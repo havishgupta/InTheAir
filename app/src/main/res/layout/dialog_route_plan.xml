@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Plan Route &amp; Download Offline Maps"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etFrom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Departure (e.g., Mumbai)"
+        android:inputType="textCapWords"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/etTo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Destination (e.g., Delhi)"
+        android:inputType="textCapWords"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnDownload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Download Route Maps"
+        android:backgroundTint="#007AFF"
+        android:textColor="#FFFFFF"/>
+
+</LinearLayout>

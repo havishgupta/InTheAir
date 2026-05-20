@@ -1,10 +1,16 @@
 package com.havish.foreflight
 
 import android.Manifest
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.view.View
+import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -28,23 +34,45 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.io.File
+import kotlin.math.abs
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), LocationListener {
 
     private lateinit var map: MapView
     private lateinit var locationOverlay: MyLocationNewOverlay
     private val client = OkHttpClient()
     private val scope = CoroutineScope(Dispatchers.Main)
+    
+    private lateinit var tvSpeed: TextView
+    private lateinit var tvAlt: TextView
+    private lateinit var tvHeading: TextView
+    private lateinit var tvClimb: TextView
+
+    private var lastAlt = 0.0
+    private var lastTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Setup OSMDroid config
+        // Setup OSMDroid config to use internal storage to avoid crashes on Android 10+
         val ctx = applicationContext
+        val basePath = File(ctx.filesDir, "osmdroid")
+        basePath.mkdirs()
+        val tileCache = File(basePath, "tiles")
+        tileCache.mkdirs()
+
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         Configuration.getInstance().userAgentValue = "ForeflightClone/1.0"
+        Configuration.getInstance().osmdroidBasePath = basePath
+        Configuration.getInstance().osmdroidTileCache = tileCache
 
         setContentView(R.layout.activity_main)
+
+        tvSpeed = findViewById(R.id.tvSpeed)
+        tvAlt = findViewById(R.id.tvAlt)
+        tvHeading = findViewById(R.id.tvHeading)
+        tvClimb = findViewById(R.id.tvClimb)
 
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -80,18 +108,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Button>(R.id.btnDownload).setOnClickListener {
-            val fromCity = findViewById<EditText>(R.id.etFrom).text.toString()
-            val toCity = findViewById<EditText>(R.id.etTo).text.toString()
-            val tvStatus = findViewById<TextView>(R.id.tvStatus)
+        findViewById<FloatingActionButton>(R.id.fabSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        findViewById<FloatingActionButton>(R.id.fabRoute).setOnClickListener {
+            showRoutePlanDialog()
+        }
+    }
+    
+    private fun showRoutePlanDialog() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_route_plan, null)
+        val etFrom = view.findViewById<EditText>(R.id.etFrom)
+        val etTo = view.findViewById<EditText>(R.id.etTo)
+        val btnDownload = view.findViewById<Button>(R.id.btnDownload)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(view)
+            .create()
+
+        btnDownload.setOnClickListener {
+            val fromCity = etFrom.text.toString()
+            val toCity = etTo.text.toString()
 
             if (fromCity.isBlank() || toCity.isBlank()) {
                 Toast.makeText(this, "Enter both From and To locations", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
-            tvStatus.visibility = View.VISIBLE
-            tvStatus.text = "Geocoding locations..."
+            
+            dialog.dismiss()
+            Toast.makeText(this, "Calculating route & downloading...", Toast.LENGTH_LONG).show()
 
             scope.launch {
                 try {
@@ -99,29 +145,25 @@ class MainActivity : AppCompatActivity() {
                     val toCoord = geocodeCity(toCity)
 
                     if (fromCoord != null && toCoord != null) {
-                        tvStatus.text = "Found coordinates. Calculating bounding box..."
-                        
-                        // Calculate bounding box encompassing both points
                         val minLat = minOf(fromCoord.latitude, toCoord.latitude) - 0.5
                         val maxLat = maxOf(fromCoord.latitude, toCoord.latitude) + 0.5
                         val minLon = minOf(fromCoord.longitude, toCoord.longitude) - 0.5
                         val maxLon = maxOf(fromCoord.longitude, toCoord.longitude) + 0.5
 
                         val boundingBox = BoundingBox(maxLat, maxLon, minLat, minLon)
-                        
-                        // Center map to see the bounding box roughly
                         map.zoomToBoundingBox(boundingBox, true)
 
-                        tvStatus.text = "Downloading offline map (zoom 5-11)..."
-                        downloadMapArea(boundingBox, tvStatus)
+                        downloadMapArea(boundingBox)
                     } else {
-                        tvStatus.text = "Failed to find one or both locations."
+                        Toast.makeText(this@MainActivity, "Failed to find one or both locations.", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    tvStatus.text = "Error: ${e.message}"
+                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
+        
+        dialog.show()
     }
 
     private suspend fun geocodeCity(city: String): GeoPoint? = withContext(Dispatchers.IO) {
@@ -147,43 +189,35 @@ class MainActivity : AppCompatActivity() {
         return@withContext null
     }
 
-    private fun downloadMapArea(boundingBox: BoundingBox, tvStatus: TextView) {
+    private fun downloadMapArea(boundingBox: BoundingBox) {
         val cacheManager = CacheManager(map)
-        
-        // Warning: Downloading large areas can take a long time and use a lot of storage.
-        // For a prototype, zoom levels 5 to 11 are reasonable for a route.
         val zoomMin = 5
         val zoomMax = 11
 
         cacheManager.downloadAreaAsync(this, boundingBox, zoomMin, zoomMax, object : CacheManager.CacheManagerCallback {
             override fun onTaskComplete() {
                 runOnUiThread {
-                    tvStatus.text = "Download Complete!"
-                    Toast.makeText(this@MainActivity, "Offline map ready", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, "Offline map download complete!", Toast.LENGTH_LONG).show()
                 }
             }
 
             override fun onTaskFailed(errors: Int) {
                 runOnUiThread {
-                    tvStatus.text = "Download Failed with $errors errors."
+                    Toast.makeText(this@MainActivity, "Download failed with $errors errors.", Toast.LENGTH_LONG).show()
                 }
             }
 
             override fun updateProgress(progress: Int, currentZoomLevel: Int, zoomMin: Int, zoomMax: Int) {
-                runOnUiThread {
-                    tvStatus.text = "Downloading... $progress / ${cacheManager.possibleTilesInArea(boundingBox, zoomMin, zoomMax)} tiles"
-                }
+                // Background download progress
             }
 
             override fun downloadStarted() {
                 runOnUiThread {
-                    tvStatus.text = "Download Started..."
+                    Toast.makeText(this@MainActivity, "Download started...", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun setPossibleTilesInArea(total: Int) {
-                // Not strictly needed since updateProgress uses total
-            }
+            override fun setPossibleTilesInArea(total: Int) {}
         })
     }
 
@@ -202,16 +236,74 @@ class MainActivity : AppCompatActivity() {
 
         if (needed.isNotEmpty()) {
             ActivityCompat.requestPermissions(this, needed.toTypedArray(), 1)
+        } else {
+            startLocationUpdates()
         }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1) {
-            // If location was granted, enable it
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 locationOverlay.enableMyLocation()
+                startLocationUpdates()
             }
+        }
+    }
+    
+    private fun startLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 1f, this)
+        }
+    }
+
+    override fun onLocationChanged(location: Location) {
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val isMetric = prefs.getBoolean("is_metric", false)
+
+        // Speed (m/s to kts or km/h)
+        if (location.hasSpeed()) {
+            if (isMetric) {
+                val speedKmh = location.speed * 3.6
+                tvSpeed.text = String.format("%.0f km/h", speedKmh)
+            } else {
+                val speedKts = location.speed * 1.94384
+                tvSpeed.text = String.format("%.0f kts", speedKts)
+            }
+        }
+
+        // Altitude (meters to feet or meters)
+        if (location.hasAltitude()) {
+            if (isMetric) {
+                tvAlt.text = String.format("%.0f m", location.altitude)
+            } else {
+                val altFt = location.altitude * 3.28084
+                tvAlt.text = String.format("%.0f ft", altFt)
+            }
+            
+            // Climb Calculation
+            val currentTime = System.currentTimeMillis()
+            if (lastTime > 0) {
+                val timeDiffMin = (currentTime - lastTime) / 60000.0
+                if (timeDiffMin > 0) {
+                    val altDiff = location.altitude - lastAlt
+                    if (isMetric) {
+                        val climbMpm = altDiff / timeDiffMin
+                        tvClimb.text = String.format("%+d m/m", climbMpm.toInt())
+                    } else {
+                        val climbFpm = (altDiff * 3.28084) / timeDiffMin
+                        tvClimb.text = String.format("%+d fpm", climbFpm.toInt())
+                    }
+                }
+            }
+            lastAlt = location.altitude
+            lastTime = currentTime
+        }
+
+        // Heading
+        if (location.hasBearing()) {
+            tvHeading.text = String.format("%03d°", location.bearing.toInt())
         }
     }
 
@@ -219,11 +311,14 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         map.onResume()
         locationOverlay.enableMyLocation()
+        startLocationUpdates()
     }
 
     override fun onPause() {
         super.onPause()
         map.onPause()
         locationOverlay.disableMyLocation()
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager.removeUpdates(this)
     }
 }
