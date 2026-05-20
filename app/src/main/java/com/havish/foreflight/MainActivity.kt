@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun geocodeCity(city: String): GeoPoint? = withContext(Dispatchers.IO) {
-        val url = "https://nominatim.openstreetmap.org/search?q=\${city.replace(" ", "+")}&format=json&limit=1"
+        val url = "https://nominatim.openstreetmap.org/search?q=${city.replace(" ", "+")}&format=json&limit=1"
         val request = Request.Builder().url(url).header("User-Agent", "ForeflightClone").build()
         try {
             val response = client.newCall(request).execute()
@@ -165,13 +165,13 @@ class MainActivity : AppCompatActivity() {
 
             override fun onTaskFailed(errors: Int) {
                 runOnUiThread {
-                    tvStatus.text = "Download Failed with \$errors errors."
+                    tvStatus.text = "Download Failed with $errors errors."
                 }
             }
 
             override fun updateProgress(progress: Int, currentZoomLevel: Int, zoomMin: Int, zoomMax: Int) {
                 runOnUiThread {
-                    tvStatus.text = "Downloading... \$progress / \${cacheManager.possibleTilesInArea(boundingBox, zoomMin, zoomMax)} tiles"
+                    tvStatus.text = "Downloading... $progress / ${cacheManager.possibleTilesInArea(boundingBox, zoomMin, zoomMax)} tiles"
                 }
             }
 
