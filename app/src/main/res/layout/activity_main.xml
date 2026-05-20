@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#121212"
     tools:context=".MainActivity">
 
     <!-- The Map View -->
@@ -17,66 +17,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Top Settings FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabSettings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        android:src="@android:drawable/ic_menu_preferences"
-        app:backgroundTint="#801C1C1E"
-        app:tint="#FFFFFF"
-        app:elevation="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Route Planner FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabRoute"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="16dp"
-        android:src="@android:drawable/ic_menu_mapmode"
-        app:backgroundTint="#00E5FF"
-        app:tint="#0A0A0A"
-        app:elevation="8dp"
-        app:layout_constraintBottom_toTopOf="@id/fabLocation"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- My Location FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="32dp"
-        android:src="@android:drawable/ic_menu_mylocation"
-        app:backgroundTint="#801C1C1E"
-        app:tint="#FFFFFF"
-        app:elevation="8dp"
-        app:layout_constraintBottom_toTopOf="@id/telemetryDashboard"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Glassmorphism Telemetry Dashboard -->
+    <!-- Top Telemetry Dashboard (Sleek modern design) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/telemetryDashboard"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardBackgroundColor="#CC121214"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="#D91E1E24"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:baselineAligned="false"
             android:orientation="horizontal"
-            android:padding="20dp"
+            android:padding="16dp"
             android:weightSum="5">
 
             <!-- SPEED -->
@@ -90,19 +50,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
                     android:text="SPEED"
-                    android:textColor="#888888"
+                    android:textColor="#A0A0A0"
                     android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvSpeed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:text="--"
-                    android:textColor="#00E5FF"
+                    android:textColor="#4DB6AC"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -118,17 +78,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
                     android:text="ALT"
-                    android:textColor="#888888"
+                    android:textColor="#A0A0A0"
                     android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvAlt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:text="--"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
@@ -146,17 +106,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
                     android:text="HDG"
-                    android:textColor="#888888"
+                    android:textColor="#A0A0A0"
                     android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvHeading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:text="--"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
@@ -174,19 +134,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
                     android:text="CLIMB"
-                    android:textColor="#888888"
+                    android:textColor="#A0A0A0"
                     android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvClimb"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:text="--"
-                    android:textColor="#FF9800"
+                    android:textColor="#FFB74D"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -202,23 +162,109 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
                     android:text="ANG"
-                    android:textColor="#888888"
+                    android:textColor="#A0A0A0"
                     android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvClimbAngle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:text="--"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Side Action Buttons (ForeFlight style vertical menu on the right) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:src="@android:drawable/ic_menu_preferences"
+            app:backgroundTint="#D91E1E24"
+            app:elevation="4dp"
+            app:fabSize="normal"
+            app:tint="#FFFFFF" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:src="@android:drawable/ic_menu_mapmode"
+            app:backgroundTint="#4DB6AC"
+            app:elevation="4dp"
+            app:fabSize="normal"
+            app:tint="#121212" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_mylocation"
+            app:backgroundTint="#D91E1E24"
+            app:elevation="4dp"
+            app:fabSize="normal"
+            app:tint="#FFFFFF" />
+    </LinearLayout>
+
+    <!-- Offline Mode Popup (Dismissable) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardOfflineMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#E6D32F2F"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Offline Mode"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="12dp" />
+
+            <ImageView
+                android:id="@+id/ivCloseOfflineMode"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#FFFFFF"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

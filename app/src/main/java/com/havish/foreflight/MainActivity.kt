@@ -9,23 +9,31 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.location.Geocoder
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +57,7 @@ import java.io.FileOutputStream
 import kotlin.math.atan2
 import kotlin.math.roundToInt
 
-class MainActivity : AppCompatActivity(), LocationListener {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var map: MapView
     private lateinit var locationOverlay: MyLocationNewOverlay
@@ -66,6 +74,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private var lastLocation: Location? = null
     private var downloadJob: Job? = null
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
     // Launcher for selecting a .map file
     private val mapFilePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -79,8 +90,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         // Initialize Mapsforge graphics factory before anything else
         AndroidGraphicFactory.createInstance(application)
 
-        
-        // Setup OSMDroid config to use internal storage to avoid crashes on Android 10+
+        // Setup OSMDroid config to use internal storage
         val ctx = applicationContext
         val basePath = File(ctx.filesDir, "osmdroid")
         basePath.mkdirs()
@@ -107,6 +117,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
         
         // Default location to Mumbai if no GPS initially
         map.controller.setCenter(GeoPoint(19.0760, 72.8777))
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        setupLocationCallback()
 
         setupLocationOverlay()
         setupUI()
@@ -168,6 +181,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
         findViewById<FloatingActionButton>(R.id.fabRoute).setOnClickListener {
             showRoutePlanDialog()
         }
+
+        val cardOfflineMode = findViewById<CardView>(R.id.cardOfflineMode)
+        val ivCloseOfflineMode = findViewById<ImageView>(R.id.ivCloseOfflineMode)
+        ivCloseOfflineMode.setOnClickListener {
+            cardOfflineMode.visibility = View.GONE
+        }
     }
     
     private fun setupAutoComplete(editText: AutoCompleteTextView) {
@@ -176,33 +195,26 @@ class MainActivity : AppCompatActivity(), LocationListener {
         editText.setAdapter(adapter)
         editText.threshold = 2
 
-        // Flag to prevent re-querying when user selects an item from dropdown
         var isUserSelecting = false
-        // Debounce job to avoid flooding the geocoder on every keystroke
         var searchJob: Job? = null
 
-        // When user taps an item from the dropdown, lock in the selection
         editText.setOnItemClickListener { parent, _, position, _ ->
             isUserSelecting = true
             val selected = parent.getItemAtPosition(position) as String
             editText.setText(selected)
             editText.setSelection(selected.length)
             editText.dismissDropDown()
-            // Reset the flag after a short delay so further typing works again
             editText.postDelayed({ isUserSelecting = false }, 300)
         }
 
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                // Don't re-query when an item was just selected from the dropdown
                 if (isUserSelecting) return
 
                 val query = s?.toString()?.trim() ?: ""
                 if (query.length >= 2) {
-                    // Cancel previous search to debounce
                     searchJob?.cancel()
                     searchJob = scope.launch {
-                        // Small delay to debounce rapid typing
                         delay(300)
                         try {
                             val results = withContext(Dispatchers.IO) {
@@ -223,7 +235,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
                                 adapter.clear()
                                 adapter.addAll(results)
                                 adapter.notifyDataSetChanged()
-                                // Force the dropdown to show — needed inside AlertDialog
                                 if (editText.isFocused && !isUserSelecting) {
                                     editText.post {
                                         try {
@@ -248,7 +259,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // Also show dropdown when the field gains focus if it already has content
         editText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus && adapter.count > 0 && !isUserSelecting) {
                 editText.post {
@@ -282,10 +292,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
             dialog.dismiss()
             try {
                 val boundingBox = map.boundingBox
-                Log.d("MapDownload", "Manual download bounding box: $boundingBox")
                 downloadMapArea(boundingBox)
             } catch (e: Exception) {
-                Log.e("MapDownload", "Error getting bounding box: ${e.message}", e)
                 Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -297,7 +305,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         btnLoadMapFile.setOnClickListener {
             dialog.dismiss()
-            // Open file picker for all file types (to allow .map selection)
             mapFilePicker.launch(arrayOf("*/*"))
         }
 
@@ -327,14 +334,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
                         val boundingBox = BoundingBox(maxLat, maxLon, minLat, minLon)
                         map.zoomToBoundingBox(boundingBox, true)
 
-                        // Small delay to let the map settle before downloading
                         delay(500)
                         downloadMapArea(boundingBox)
                     } else {
-                        Toast.makeText(this@MainActivity, "Failed to find one or both locations.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@MainActivity, "Failed to find one or both locations. Check internet.", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
-                    Log.e("MapDownload", "Route download error: ${e.message}", e)
                     Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -357,14 +362,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
         return@withContext null
     }
 
-    /**
-     * Downloads map tiles for the given bounding box using our custom
-     * TileDownloadHelper, which bypasses osmdroid's CacheManager entirely.
-     */
     private fun downloadMapArea(boundingBox: BoundingBox) {
         try {
-            Log.d("MapDownload", "Starting download for BB: N=${boundingBox.latNorth}, S=${boundingBox.latSouth}, E=${boundingBox.lonEast}, W=${boundingBox.lonWest}")
-
             if (boundingBox.latNorth <= boundingBox.latSouth || boundingBox.lonEast <= boundingBox.lonWest) {
                 Toast.makeText(this, "Invalid map area. Please try again.", Toast.LENGTH_LONG).show()
                 return
@@ -374,20 +373,15 @@ class MainActivity : AppCompatActivity(), LocationListener {
             val zoomMin = 5
             val zoomMax = 10
 
-            // Calculate tile count first to show the user
             val tileCount = helper.calculateTiles(boundingBox, zoomMin, zoomMax).size
             val estMinutes = (tileCount * 0.3 / 60).toInt() + 1
 
             startDownload(helper, boundingBox, zoomMin, zoomMax, "Route Area", tileCount, estMinutes)
         } catch (e: Exception) {
-            Log.e("MapDownload", "Error: ${e.message}", e)
             Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
-    /**
-     * Downloads the entire India map (zoom 3-8).
-     */
     private fun downloadIndiaMap() {
         val indiaBB = BoundingBox(37.0, 98.0, 6.0, 68.0)
         val zoomMin = 3
@@ -400,9 +394,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         startDownload(helper, indiaBB, zoomMin, zoomMax, "All India", tileCount, estMinutes)
     }
 
-    /**
-     * Shows a confirmation dialog, then starts the download with a progress dialog.
-     */
     private fun startDownload(
         helper: TileDownloadHelper,
         boundingBox: BoundingBox,
@@ -420,10 +411,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 "Make sure you are on Wi-Fi."
             )
             .setPositiveButton("Download") { _, _ ->
-                // Cancel any existing download
                 downloadJob?.cancel()
 
-                // Create progress dialog
                 val progressView = LayoutInflater.from(this).inflate(
                     android.R.layout.simple_list_item_1, null
                 )
@@ -458,9 +447,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
                         override fun onComplete(downloaded: Int, errors: Int) {
                             if (progressDialog.isShowing) progressDialog.dismiss()
                             if (errors == 0) {
-                                Toast.makeText(this@MainActivity, "$areaName download complete! ($downloaded tiles)", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@MainActivity, "$areaName download complete!", Toast.LENGTH_LONG).show()
                             } else {
-                                Toast.makeText(this@MainActivity, "$areaName: $downloaded tiles downloaded, $errors errors.", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@MainActivity, "$areaName: downloaded, $errors errors.", Toast.LENGTH_LONG).show()
                             }
                         }
 
@@ -475,9 +464,31 @@ class MainActivity : AppCompatActivity(), LocationListener {
             .show()
     }
 
-    /**
-     * Copies the selected file URI to internal storage and loads it into Mapsforge.
-     */
+    private fun getFileName(uri: android.net.Uri): String {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = contentResolver.query(uri, null, null, null, null)
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (index >= 0) {
+                        result = cursor.getString(index)
+                    }
+                }
+            } finally {
+                cursor?.close()
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/') ?: -1
+            if (cut != -1) {
+                result = result?.substring(cut + 1)
+            }
+        }
+        return result ?: "offline_map_${System.currentTimeMillis()}.map"
+    }
+
     private fun importAndLoadMapFile(uri: android.net.Uri) {
         val progressDialog = AlertDialog.Builder(this)
             .setTitle("Importing Map")
@@ -486,15 +497,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
             .create()
         progressDialog.show()
 
+        val fileName = getFileName(uri)
+
         scope.launch {
             try {
                 val mapsDir = File(filesDir, "mapsforge")
                 mapsDir.mkdirs()
                 
-                // Clear old maps to save space
-                mapsDir.listFiles()?.forEach { it.delete() }
-
-                val destFile = File(mapsDir, "offline_map.map")
+                val destFile = File(mapsDir, fileName)
 
                 withContext(Dispatchers.IO) {
                     contentResolver.openInputStream(uri)?.use { input ->
@@ -504,12 +514,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
                     }
                 }
 
+                val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putString("active_offline_map", fileName).apply()
+
                 progressDialog.dismiss()
                 loadMapsforgeFile(destFile)
                 
             } catch (e: Throwable) {
                 progressDialog.dismiss()
-                Log.e("Mapsforge", "Error importing map: ${e.message}", e)
                 Toast.makeText(this@MainActivity, "Failed to import map: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -518,20 +530,36 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun checkForSavedMapFile() {
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
         val offlineOnly = prefs.getBoolean("offline_maps_only", false)
+        val activeMapName = prefs.getString("active_offline_map", null)
         
+        val cardOfflineMode = findViewById<CardView>(R.id.cardOfflineMode)
+        if (offlineOnly) {
+            cardOfflineMode.visibility = View.VISIBLE
+        } else {
+            cardOfflineMode.visibility = View.GONE
+        }
+
         if (!offlineOnly) {
-            // Revert to online maps if setting is disabled
             map.setTileSource(TileSourceFactory.MAPNIK)
             map.setUseDataConnection(true)
             return
         }
 
         val mapsDir = File(filesDir, "mapsforge")
-        val mapFile = File(mapsDir, "offline_map.map")
-        if (mapFile.exists()) {
-            loadMapsforgeFile(mapFile)
+        if (activeMapName != null) {
+            val mapFile = File(mapsDir, activeMapName)
+            if (mapFile.exists()) {
+                loadMapsforgeFile(mapFile)
+                return
+            }
+        }
+        
+        // fallback to first map if active not found
+        val firstMap = mapsDir.listFiles()?.firstOrNull { it.extension == "map" }
+        if (firstMap != null) {
+            loadMapsforgeFile(firstMap)
         } else {
-            Toast.makeText(this, "Offline maps only is enabled, but no map file is loaded. Please load a map.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Offline maps only enabled, but no map found.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -548,12 +576,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
             
             map.setTileProvider(tileProvider)
             map.setTileSource(tileSource)
-            map.setUseDataConnection(false) // Disable online tile fetching for better offline performance
-            map.controller.setZoom(10.0) // reset zoom to ensure tiles load
+            map.setUseDataConnection(false)
+            map.controller.setZoom(10.0)
             
-            Toast.makeText(this, "Offline vector map loaded successfully!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Offline map loaded: ${file.name}", Toast.LENGTH_SHORT).show()
         } catch (e: Throwable) {
-            Log.e("Mapsforge", "Error loading map: ${e.message}", e)
             Toast.makeText(this, "Failed to load offline map: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
@@ -589,32 +616,42 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         }
     }
-    
-    private fun startLocationUpdates() {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 1f, this)
+
+    private fun setupLocationCallback() {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    processLocation(location)
+                }
             }
         }
-        
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 1f, this)
+    }
+    
+    private fun startLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
+                .setMinUpdateIntervalMillis(500L)
+                .build()
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
+            
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    processLocation(location)
+                }
             }
         }
     }
 
-    override fun onLocationChanged(location: Location) {
+    private fun processLocation(location: Location) {
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
-        val speedUnit = prefs.getString("unit_speed", "kts")
-        val altUnit = prefs.getString("unit_alt", "ft")
-        val climbUnit = prefs.getString("unit_climb", "fpm")
+        val speedUnit = prefs.getString("unit_speed", "kmh")
+        val altUnit = prefs.getString("unit_alt", "m")
+        val climbUnit = prefs.getString("unit_climb", "ms")
 
         var verticalSpeedMs = 0.0
 
-        // Speed (m/s to kts, km/h, mph)
+        // Speed
         if (location.hasSpeed()) {
             when (speedUnit) {
                 "kmh" -> {
@@ -625,20 +662,27 @@ class MainActivity : AppCompatActivity(), LocationListener {
                     val speedMph = location.speed * 2.23694
                     tvSpeed.text = String.format("%.0f mph", speedMph)
                 }
-                else -> {
+                "mach" -> {
+                    val mach = location.speed / 343.0
+                    tvSpeed.text = String.format("%.2f M", mach)
+                }
+                else -> { // kts
                     val speedKts = location.speed * 1.94384
                     tvSpeed.text = String.format("%.0f kts", speedKts)
                 }
             }
         }
 
-        // Altitude (meters to feet or meters)
+        // Altitude
         if (location.hasAltitude()) {
-            if (altUnit == "m") {
-                tvAlt.text = String.format("%.0f m", location.altitude)
-            } else {
-                val altFt = location.altitude * 3.28084
-                tvAlt.text = String.format("%.0f ft", altFt)
+            when (altUnit) {
+                "m" -> tvAlt.text = String.format("%.0f m", location.altitude)
+                "km" -> tvAlt.text = String.format("%.2f km", location.altitude / 1000.0)
+                "bk" -> tvAlt.text = String.format("%.2f bk", location.altitude / 828.0)
+                else -> { // ft
+                    val altFt = location.altitude * 3.28084
+                    tvAlt.text = String.format("%.0f ft", altFt)
+                }
             }
             
             // Climb Calculation
@@ -650,11 +694,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
                     val altDiff = location.altitude - lastAlt
                     verticalSpeedMs = altDiff / timeDiffSec
                     
-                    if (climbUnit == "ms") {
-                        tvClimb.text = String.format("%+d m/s", verticalSpeedMs.toInt())
-                    } else {
-                        val climbFpm = (altDiff * 3.28084) / timeDiffMin
-                        tvClimb.text = String.format("%+d fpm", climbFpm.toInt())
+                    when (climbUnit) {
+                        "ms" -> tvClimb.text = String.format("%+d m/s", verticalSpeedMs.toInt())
+                        "kmh" -> tvClimb.text = String.format("%+d km/h", (verticalSpeedMs * 3.6).toInt())
+                        else -> { // fpm
+                            val climbFpm = (altDiff * 3.28084) / timeDiffMin
+                            tvClimb.text = String.format("%+d fpm", climbFpm.toInt())
+                        }
                     }
                 }
             }
@@ -663,7 +709,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
 
         // Climb Angle Calculation
-        if (location.hasSpeed() && location.speed > 0.5) { // Minimum speed to avoid erratic angles
+        if (location.hasSpeed() && location.speed > 0.5) { 
             val angle = Math.toDegrees(atan2(verticalSpeedMs, location.speed.toDouble()))
             tvClimbAngle.text = String.format("%+d°", angle.roundToInt())
         } else {
@@ -675,7 +721,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             tvHeading.text = String.format("%03d°", location.bearing.toInt())
         } else if (lastLocation != null) {
             val distance = lastLocation!!.distanceTo(location)
-            if (distance > 0.5f) { // Only update bearing if moved significantly
+            if (distance > 0.5f) { 
                 var bearing = lastLocation!!.bearingTo(location)
                 if (bearing < 0) bearing += 360f
                 tvHeading.text = String.format("%03d°", bearing.toInt())
@@ -689,14 +735,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
         map.onResume()
         locationOverlay.enableMyLocation()
         startLocationUpdates()
-        checkForSavedMapFile() // Re-check in case settings changed
+        checkForSavedMapFile()
     }
 
     override fun onPause() {
         super.onPause()
         map.onPause()
         locationOverlay.disableMyLocation()
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        locationManager.removeUpdates(this)
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 }

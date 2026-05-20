@@ -1,36 +1,94 @@
 package com.havish.foreflight
 
+import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
+import java.io.File
 
 class OfflineMapsActivity : AppCompatActivity() {
 
-    private lateinit var map: MapView
+    private lateinit var mapsListContainer: LinearLayout
+    private lateinit var tvEmpty: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_offline_maps)
 
-        map = findViewById(R.id.offlineMap)
-        map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setMultiTouchControls(true)
-        map.controller.setZoom(5.0)
-        map.controller.setCenter(GeoPoint(19.0760, 72.8777))
-        
-        // This is the key setting: completely disable data connection for this map view
-        map.setUseDataConnection(false)
+        mapsListContainer = findViewById(R.id.mapsListContainer)
+        tvEmpty = findViewById(R.id.tvEmpty)
+
+        loadOfflineMaps()
     }
 
-    override fun onResume() {
-        super.onResume()
-        map.onResume()
-    }
+    private fun loadOfflineMaps() {
+        mapsListContainer.removeAllViews()
+        val mapsDir = File(filesDir, "mapsforge")
+        val mapFiles = mapsDir.listFiles()?.filter { it.extension == "map" } ?: emptyList()
 
-    override fun onPause() {
-        super.onPause()
-        map.onPause()
+        if (mapFiles.isEmpty()) {
+            tvEmpty.visibility = View.VISIBLE
+            return
+        }
+
+        tvEmpty.visibility = View.GONE
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val activeMap = prefs.getString("active_offline_map", null)
+
+        for (file in mapFiles) {
+            val itemView = LayoutInflater.from(this).inflate(R.layout.item_offline_map, mapsListContainer, false)
+            
+            val tvMapName = itemView.findViewById<TextView>(R.id.tvMapName)
+            val tvMapSize = itemView.findViewById<TextView>(R.id.tvMapSize)
+            val btnActive = itemView.findViewById<Button>(R.id.btnActive)
+            val btnDelete = itemView.findViewById<ImageView>(R.id.btnDelete)
+
+            tvMapName.text = file.name
+            
+            val sizeMb = file.length() / (1024.0 * 1024.0)
+            tvMapSize.text = String.format("%.2f MB", sizeMb)
+
+            if (file.name == activeMap) {
+                btnActive.text = "Active"
+                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4CAF50"))
+                btnActive.isEnabled = false
+            } else {
+                btnActive.text = "Set Active"
+                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4DB6AC"))
+                btnActive.isEnabled = true
+                btnActive.setOnClickListener {
+                    prefs.edit().putString("active_offline_map", file.name).apply()
+                    loadOfflineMaps() // refresh list
+                    Toast.makeText(this, "${file.name} set as active", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            btnDelete.setOnClickListener {
+                android.app.AlertDialog.Builder(this)
+                    .setTitle("Delete Map")
+                    .setMessage("Are you sure you want to delete ${file.name}?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        if (file.delete()) {
+                            if (file.name == activeMap) {
+                                prefs.edit().remove("active_offline_map").apply()
+                            }
+                            loadOfflineMaps()
+                            Toast.makeText(this, "Map deleted", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this, "Failed to delete map", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+
+            mapsListContainer.addView(itemView)
+        }
     }
 }

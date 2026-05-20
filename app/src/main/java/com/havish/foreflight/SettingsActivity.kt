@@ -27,40 +27,54 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         // Speed
-        when (prefs.getString("unit_speed", "kts")) {
+        when (prefs.getString("unit_speed", "kmh")) {
             "kts" -> findViewById<RadioButton>(R.id.rbSpeedKts).isChecked = true
             "kmh" -> findViewById<RadioButton>(R.id.rbSpeedKmh).isChecked = true
             "mph" -> findViewById<RadioButton>(R.id.rbSpeedMph).isChecked = true
+            "mach" -> findViewById<RadioButton>(R.id.rbSpeedMach).isChecked = true
         }
 
         findViewById<RadioGroup>(R.id.rgSpeedUnits).setOnCheckedChangeListener { _, checkedId ->
             val unit = when (checkedId) {
                 R.id.rbSpeedKmh -> "kmh"
                 R.id.rbSpeedMph -> "mph"
+                R.id.rbSpeedMach -> "mach"
                 else -> "kts"
             }
             prefs.edit().putString("unit_speed", unit).apply()
         }
 
         // Altitude
-        when (prefs.getString("unit_alt", "ft")) {
+        when (prefs.getString("unit_alt", "m")) {
             "ft" -> findViewById<RadioButton>(R.id.rbAltFt).isChecked = true
             "m" -> findViewById<RadioButton>(R.id.rbAltM).isChecked = true
+            "km" -> findViewById<RadioButton>(R.id.rbAltKm).isChecked = true
+            "bk" -> findViewById<RadioButton>(R.id.rbAltBk).isChecked = true
         }
 
         findViewById<RadioGroup>(R.id.rgAltUnits).setOnCheckedChangeListener { _, checkedId ->
-            val unit = if (checkedId == R.id.rbAltM) "m" else "ft"
+            val unit = when (checkedId) {
+                R.id.rbAltM -> "m"
+                R.id.rbAltKm -> "km"
+                R.id.rbAltBk -> "bk"
+                else -> "ft"
+            }
             prefs.edit().putString("unit_alt", unit).apply()
         }
 
         // Climb Rate
-        when (prefs.getString("unit_climb", "fpm")) {
+        when (prefs.getString("unit_climb", "ms")) {
             "fpm" -> findViewById<RadioButton>(R.id.rbClimbFpm).isChecked = true
             "ms" -> findViewById<RadioButton>(R.id.rbClimbMs).isChecked = true
+            "kmh" -> findViewById<RadioButton>(R.id.rbClimbKmh).isChecked = true
         }
 
         findViewById<RadioGroup>(R.id.rgClimbUnits).setOnCheckedChangeListener { _, checkedId ->
-            val unit = if (checkedId == R.id.rbClimbMs) "ms" else "fpm"
+            val unit = when (checkedId) {
+                R.id.rbClimbMs -> "ms"
+                R.id.rbClimbKmh -> "kmh"
+                else -> "fpm"
+            }
             prefs.edit().putString("unit_climb", unit).apply()
         }
 
@@ -71,7 +85,7 @@ class SettingsActivity : AppCompatActivity() {
             if (tileCache != null && tileCache.exists()) {
                 tileCache.deleteRecursively()
                 tileCache.mkdirs()
-                Toast.makeText(this, "Offline Maps Cleared", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Offline Tile Cache Cleared", Toast.LENGTH_SHORT).show()
                 updateCacheSize()
             }
         }

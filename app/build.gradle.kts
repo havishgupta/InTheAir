@@ -54,4 +54,7 @@ dependencies {
     implementation("org.osmdroid:osmdroid-mapsforge:6.1.18")
     implementation("org.mapsforge:mapsforge-map-android:0.13.0")
     implementation("org.mapsforge:mapsforge-themes:0.13.0")
+
+    // Google Play Services for faster, accurate location
+    implementation("com.google.android.gms:play-services-location:21.2.0")
 }
