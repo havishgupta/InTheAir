@@ -8,14 +8,18 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -26,9 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONArray
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -39,22 +40,24 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), LocationListener {
 
     private lateinit var map: MapView
     private lateinit var locationOverlay: MyLocationNewOverlay
-    private val client = OkHttpClient()
     private val scope = CoroutineScope(Dispatchers.Main)
     
     private lateinit var tvSpeed: TextView
     private lateinit var tvAlt: TextView
     private lateinit var tvHeading: TextView
     private lateinit var tvClimb: TextView
-    private lateinit var tvCoord: TextView
+    private lateinit var tvClimbAngle: TextView
 
     private var lastAlt = 0.0
     private var lastTime = 0L
+    private var lastLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +80,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         tvAlt = findViewById(R.id.tvAlt)
         tvHeading = findViewById(R.id.tvHeading)
         tvClimb = findViewById(R.id.tvClimb)
-        tvCoord = findViewById(R.id.tvCoord)
+        tvClimbAngle = findViewById(R.id.tvClimbAngle)
 
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -141,15 +144,70 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
     
+    private fun setupAutoComplete(editText: AutoCompleteTextView) {
+        val geocoder = Geocoder(this@MainActivity)
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line)
+        editText.setAdapter(adapter)
+
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (s != null && s.length > 2) {
+                    scope.launch(Dispatchers.IO) {
+                        try {
+                            val addresses = geocoder.getFromLocationName(s.toString(), 5)
+                            if (!addresses.isNullOrEmpty()) {
+                                val results = addresses.mapNotNull {
+                                    val name = it.featureName ?: ""
+                                    val locality = it.locality ?: ""
+                                    val adminArea = it.adminArea ?: ""
+                                    val country = it.countryName ?: ""
+                                    listOf(name, locality, adminArea, country)
+                                        .filter { part -> part.isNotBlank() }
+                                        .distinct()
+                                        .joinToString(", ")
+                                }.distinct()
+                                
+                                withContext(Dispatchers.Main) {
+                                    adapter.clear()
+                                    adapter.addAll(results)
+                                    adapter.notifyDataSetChanged()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+    
     private fun showRoutePlanDialog() {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_route_plan, null)
-        val etFrom = view.findViewById<EditText>(R.id.etFrom)
-        val etTo = view.findViewById<EditText>(R.id.etTo)
+        val etFrom = view.findViewById<AutoCompleteTextView>(R.id.etFrom)
+        val etTo = view.findViewById<AutoCompleteTextView>(R.id.etTo)
         val btnDownload = view.findViewById<Button>(R.id.btnDownload)
+        val btnDownloadManual = view.findViewById<Button>(R.id.btnDownloadManual)
+
+        setupAutoComplete(etFrom)
+        setupAutoComplete(etTo)
 
         val dialog = AlertDialog.Builder(this)
             .setView(view)
             .create()
+
+        btnDownloadManual.setOnClickListener {
+            dialog.dismiss()
+            val cacheManager = CacheManager(map)
+            cacheManager.showUserDownloadingDialog(this@MainActivity, object : android.content.DialogInterface.OnCancelListener {
+                override fun onCancel(dialog: android.content.DialogInterface?) {
+                    // Do nothing
+                }
+            })
+        }
 
         btnDownload.setOnClickListener {
             val fromCity = etFrom.text.toString().trim()
@@ -191,30 +249,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     private suspend fun geocodeCity(city: String): GeoPoint? = withContext(Dispatchers.IO) {
-        // Append "+airport" if it looks like an IATA/ICAO code to improve search reliability
-        var query = city.replace(" ", "+")
-        if (city.length in 3..4 && city.all { it.isLetter() }) {
-            query += "+airport"
-        }
-        
-        val url = "https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=1"
-        val request = Request.Builder()
-            .url(url)
-            .header("User-Agent", "InTheAir/1.0 (test@example.com)") // Nominatim requires valid User-Agent
-            .build()
         try {
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                val jsonStr = response.body?.string()
-                if (!jsonStr.isNullOrEmpty()) {
-                    val jsonArray = JSONArray(jsonStr)
-                    if (jsonArray.length() > 0) {
-                        val obj = jsonArray.getJSONObject(0)
-                        val lat = obj.getString("lat").toDouble()
-                        val lon = obj.getString("lon").toDouble()
-                        return@withContext GeoPoint(lat, lon)
-                    }
-                }
+            val geocoder = Geocoder(this@MainActivity)
+            val addresses = geocoder.getFromLocationName(city, 1)
+            if (!addresses.isNullOrEmpty()) {
+                val address = addresses[0]
+                return@withContext GeoPoint(address.latitude, address.longitude)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -301,8 +341,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val altUnit = prefs.getString("unit_alt", "ft")
         val climbUnit = prefs.getString("unit_climb", "fpm")
 
-        // Coordinates
-        tvCoord.text = String.format("%.2f\n%.2f", location.latitude, location.longitude)
+        var verticalSpeedMs = 0.0
 
         // Speed (m/s to kts, km/h, mph)
         if (location.hasSpeed()) {
@@ -338,10 +377,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 val timeDiffSec = (currentTime - lastTime) / 1000.0
                 if (timeDiffMin > 0 && timeDiffSec > 0) {
                     val altDiff = location.altitude - lastAlt
+                    verticalSpeedMs = altDiff / timeDiffSec
                     
                     if (climbUnit == "ms") {
-                        val climbMs = altDiff / timeDiffSec
-                        tvClimb.text = String.format("%+d m/s", climbMs.toInt())
+                        tvClimb.text = String.format("%+d m/s", verticalSpeedMs.toInt())
                     } else {
                         val climbFpm = (altDiff * 3.28084) / timeDiffMin
                         tvClimb.text = String.format("%+d fpm", climbFpm.toInt())
@@ -352,10 +391,26 @@ class MainActivity : AppCompatActivity(), LocationListener {
             lastTime = currentTime
         }
 
+        // Climb Angle Calculation
+        if (location.hasSpeed() && location.speed > 0.5) { // Minimum speed to avoid erratic angles
+            val angle = Math.toDegrees(atan2(verticalSpeedMs, location.speed.toDouble()))
+            tvClimbAngle.text = String.format("%+d°", angle.roundToInt())
+        } else {
+            tvClimbAngle.text = "0°"
+        }
+
         // Heading
         if (location.hasBearing()) {
             tvHeading.text = String.format("%03d°", location.bearing.toInt())
+        } else if (lastLocation != null) {
+            val distance = lastLocation!!.distanceTo(location)
+            if (distance > 0.5f) { // Only update bearing if moved significantly
+                var bearing = lastLocation!!.bearingTo(location)
+                if (bearing < 0) bearing += 360f
+                tvHeading.text = String.format("%03d°", bearing.toInt())
+            }
         }
+        lastLocation = location
     }
 
     override fun onResume() {

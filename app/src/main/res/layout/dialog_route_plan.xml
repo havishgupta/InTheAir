@@ -13,20 +13,22 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/etFrom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Departure (City or ICAO, e.g. VABB)"
+        android:hint="Departure (City or Airport)"
         android:inputType="textCapWords"
+        android:completionThreshold="2"
         android:layout_marginBottom="8dp"/>
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/etTo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Destination (City or ICAO, e.g. VIDP)"
+        android:hint="Destination (City or Airport)"
         android:inputType="textCapWords"
+        android:completionThreshold="2"
         android:layout_marginBottom="16dp"/>
 
     <Button
@@ -35,6 +37,22 @@
         android:layout_height="wrap_content"
         android:text="Download Route Maps"
         android:backgroundTint="#007AFF"
+        android:textColor="#FFFFFF"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Or download current view:"
+        android:textSize="14sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnDownloadManual"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manual Download (Select Zoom Boxes)"
+        android:backgroundTint="#4CAF50"
         android:textColor="#FFFFFF"/>
 
 </LinearLayout>
