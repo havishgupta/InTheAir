@@ -201,12 +201,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         btnDownloadManual.setOnClickListener {
             dialog.dismiss()
-            val cacheManager = CacheManager(map)
-            cacheManager.showUserDownloadingDialog(this@MainActivity, object : android.content.DialogInterface.OnCancelListener {
-                override fun onCancel(dialog: android.content.DialogInterface?) {
-                    // Do nothing
-                }
-            })
+            val boundingBox = map.boundingBox
+            downloadMapArea(boundingBox)
         }
 
         btnDownload.setOnClickListener {
