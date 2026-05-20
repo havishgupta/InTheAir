@@ -43,6 +43,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import org.osmdroid.mapsforge.MapsForgeTileSource
 import org.osmdroid.mapsforge.MapsForgeTileProvider
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
+import org.mapsforge.map.rendertheme.InternalRenderTheme
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.atan2
@@ -506,7 +507,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 progressDialog.dismiss()
                 loadMapsforgeFile(destFile)
                 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 progressDialog.dismiss()
                 Log.e("Mapsforge", "Error importing map: ${e.message}", e)
                 Toast.makeText(this@MainActivity, "Failed to import map: ${e.message}", Toast.LENGTH_LONG).show()
@@ -525,7 +526,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun loadMapsforgeFile(file: File) {
         try {
             MapsForgeTileSource.createInstance(application)
-            val tileSource = MapsForgeTileSource.createFromFiles(arrayOf(file))
+            val theme = InternalRenderTheme.OSMARENDER
+            val tileSource = MapsForgeTileSource.createFromFiles(arrayOf(file), theme, "OSMARENDER")
             val tileProvider = MapsForgeTileProvider(
                 org.osmdroid.tileprovider.util.SimpleRegisterReceiver(this),
                 tileSource,
@@ -533,8 +535,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
             )
             
             map.setTileProvider(tileProvider)
+            map.setTileSource(tileSource)
+            map.controller.setZoom(10.0) // reset zoom to ensure tiles load
+            
             Toast.makeText(this, "Offline vector map loaded successfully!", Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.e("Mapsforge", "Error loading map: ${e.message}", e)
             Toast.makeText(this, "Failed to load offline map: ${e.message}", Toast.LENGTH_LONG).show()
         }
