@@ -20,10 +20,11 @@
         android:id="@+id/telemetryBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1C1C1E"
+        android:background="#F01C1C1E"
         android:baselineAligned="false"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -40,16 +41,16 @@
                 android:layout_height="wrap_content"
                 android:text="SPEED"
                 android:textColor="#AAAAAA"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvSpeed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-- kts"
+                android:text="--"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -65,16 +66,16 @@
                 android:layout_height="wrap_content"
                 android:text="ALTITUDE"
                 android:textColor="#AAAAAA"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvAlt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-- ft"
+                android:text="--"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -90,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:text="HEADING"
                 android:textColor="#AAAAAA"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -99,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:text="--"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
         
@@ -115,16 +116,41 @@
                 android:layout_height="wrap_content"
                 android:text="CLIMB"
                 android:textColor="#AAAAAA"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvClimb"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-- fpm"
+                android:text="--"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COORD"
+                android:textColor="#AAAAAA"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvCoord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>
 

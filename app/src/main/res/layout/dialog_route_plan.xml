@@ -17,7 +17,7 @@
         android:id="@+id/etFrom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Departure (e.g., Mumbai)"
+        android:hint="Departure (City or ICAO, e.g. VABB)"
         android:inputType="textCapWords"
         android:layout_marginBottom="8dp"/>
 
@@ -25,7 +25,7 @@
         android:id="@+id/etTo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Destination (e.g., Delhi)"
+        android:hint="Destination (City or ICAO, e.g. VIDP)"
         android:inputType="textCapWords"
         android:layout_marginBottom="16dp"/>
 

@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">Foreflight</string>
+    <string name="app_name">InTheAir</string>
+    <string name="unit_speed_kts">Knots</string>
+    <string name="unit_speed_kmh">km/h</string>
+    <string name="unit_speed_mph">mph</string>
+    <string name="unit_alt_ft">Feet</string>
+    <string name="unit_alt_m">Meters</string>
+    <string name="unit_climb_fpm">ft/min</string>
+    <string name="unit_climb_ms">m/s</string>
 </resources>

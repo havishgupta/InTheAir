@@ -5,6 +5,9 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -48,6 +51,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var tvAlt: TextView
     private lateinit var tvHeading: TextView
     private lateinit var tvClimb: TextView
+    private lateinit var tvCoord: TextView
 
     private var lastAlt = 0.0
     private var lastTime = 0L
@@ -63,7 +67,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         tileCache.mkdirs()
 
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
-        Configuration.getInstance().userAgentValue = "ForeflightClone/1.0"
+        Configuration.getInstance().userAgentValue = "InTheAir/1.0"
         Configuration.getInstance().osmdroidBasePath = basePath
         Configuration.getInstance().osmdroidTileCache = tileCache
 
@@ -73,6 +77,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         tvAlt = findViewById(R.id.tvAlt)
         tvHeading = findViewById(R.id.tvHeading)
         tvClimb = findViewById(R.id.tvClimb)
+        tvCoord = findViewById(R.id.tvCoord)
 
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -87,12 +92,31 @@ class MainActivity : AppCompatActivity(), LocationListener {
         requestPermissions()
     }
 
+    private fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bitmap {
+        val drawable = ContextCompat.getDrawable(context, drawableId)!!
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth * 2, // Slightly larger for map visibility
+            drawable.intrinsicHeight * 2,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
     private fun setupLocationOverlay() {
         val locationProvider = GpsMyLocationProvider(this)
         locationProvider.locationUpdateMinTime = 1000 // 1 second updates
         locationProvider.locationUpdateMinDistance = 1.0f
 
         locationOverlay = MyLocationNewOverlay(locationProvider, map)
+        
+        // Set custom plane icon
+        val planeBitmap = getBitmapFromVectorDrawable(this, R.drawable.ic_plane)
+        locationOverlay.setPersonIcon(planeBitmap)
+        locationOverlay.setDirectionIcon(planeBitmap)
+        
         locationOverlay.enableMyLocation()
         locationOverlay.enableFollowLocation()
         map.overlays.add(locationOverlay)
@@ -128,8 +152,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
             .create()
 
         btnDownload.setOnClickListener {
-            val fromCity = etFrom.text.toString()
-            val toCity = etTo.text.toString()
+            val fromCity = etFrom.text.toString().trim()
+            val toCity = etTo.text.toString().trim()
 
             if (fromCity.isBlank() || toCity.isBlank()) {
                 Toast.makeText(this, "Enter both From and To locations", Toast.LENGTH_SHORT).show()
@@ -167,10 +191,16 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     private suspend fun geocodeCity(city: String): GeoPoint? = withContext(Dispatchers.IO) {
-        val url = "https://nominatim.openstreetmap.org/search?q=${city.replace(" ", "+")}&format=json&limit=1"
+        // Append "+airport" if it looks like an IATA/ICAO code to improve search reliability
+        var query = city.replace(" ", "+")
+        if (city.length in 3..4 && city.all { it.isLetter() }) {
+            query += "+airport"
+        }
+        
+        val url = "https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=1"
         val request = Request.Builder()
             .url(url)
-            .header("User-Agent", "ForeflightClone/1.0 (test@example.com)") // Nominatim requires valid User-Agent
+            .header("User-Agent", "InTheAir/1.0 (test@example.com)") // Nominatim requires valid User-Agent
             .build()
         try {
             val response = client.newCall(request).execute()
@@ -225,13 +255,17 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     private fun requestPermissions() {
-        val permissions = arrayOf(
+        val permissions = mutableListOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE
         )
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         val needed = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
@@ -263,22 +297,34 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     override fun onLocationChanged(location: Location) {
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
-        val isMetric = prefs.getBoolean("is_metric", false)
+        val speedUnit = prefs.getString("unit_speed", "kts")
+        val altUnit = prefs.getString("unit_alt", "ft")
+        val climbUnit = prefs.getString("unit_climb", "fpm")
 
-        // Speed (m/s to kts or km/h)
+        // Coordinates
+        tvCoord.text = String.format("%.2f\n%.2f", location.latitude, location.longitude)
+
+        // Speed (m/s to kts, km/h, mph)
         if (location.hasSpeed()) {
-            if (isMetric) {
-                val speedKmh = location.speed * 3.6
-                tvSpeed.text = String.format("%.0f km/h", speedKmh)
-            } else {
-                val speedKts = location.speed * 1.94384
-                tvSpeed.text = String.format("%.0f kts", speedKts)
+            when (speedUnit) {
+                "kmh" -> {
+                    val speedKmh = location.speed * 3.6
+                    tvSpeed.text = String.format("%.0f km/h", speedKmh)
+                }
+                "mph" -> {
+                    val speedMph = location.speed * 2.23694
+                    tvSpeed.text = String.format("%.0f mph", speedMph)
+                }
+                else -> {
+                    val speedKts = location.speed * 1.94384
+                    tvSpeed.text = String.format("%.0f kts", speedKts)
+                }
             }
         }
 
         // Altitude (meters to feet or meters)
         if (location.hasAltitude()) {
-            if (isMetric) {
+            if (altUnit == "m") {
                 tvAlt.text = String.format("%.0f m", location.altitude)
             } else {
                 val altFt = location.altitude * 3.28084
@@ -289,11 +335,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
             val currentTime = System.currentTimeMillis()
             if (lastTime > 0) {
                 val timeDiffMin = (currentTime - lastTime) / 60000.0
-                if (timeDiffMin > 0) {
+                val timeDiffSec = (currentTime - lastTime) / 1000.0
+                if (timeDiffMin > 0 && timeDiffSec > 0) {
                     val altDiff = location.altitude - lastAlt
-                    if (isMetric) {
-                        val climbMpm = altDiff / timeDiffMin
-                        tvClimb.text = String.format("%+d m/m", climbMpm.toInt())
+                    
+                    if (climbUnit == "ms") {
+                        val climbMs = altDiff / timeDiffSec
+                        tvClimb.text = String.format("%+d m/s", climbMs.toInt())
                     } else {
                         val climbFpm = (altDiff * 3.28084) / timeDiffMin
                         tvClimb.text = String.format("%+d fpm", climbFpm.toInt())

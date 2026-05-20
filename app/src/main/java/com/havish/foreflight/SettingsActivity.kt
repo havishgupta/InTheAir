@@ -18,16 +18,43 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
-        val isMetric = prefs.getBoolean("is_metric", false)
 
-        if (isMetric) {
-            findViewById<RadioButton>(R.id.rbMetric).isChecked = true
-        } else {
-            findViewById<RadioButton>(R.id.rbKnots).isChecked = true
+        // Speed
+        when (prefs.getString("unit_speed", "kts")) {
+            "kts" -> findViewById<RadioButton>(R.id.rbSpeedKts).isChecked = true
+            "kmh" -> findViewById<RadioButton>(R.id.rbSpeedKmh).isChecked = true
+            "mph" -> findViewById<RadioButton>(R.id.rbSpeedMph).isChecked = true
         }
 
         findViewById<RadioGroup>(R.id.rgSpeedUnits).setOnCheckedChangeListener { _, checkedId ->
-            prefs.edit().putBoolean("is_metric", checkedId == R.id.rbMetric).apply()
+            val unit = when (checkedId) {
+                R.id.rbSpeedKmh -> "kmh"
+                R.id.rbSpeedMph -> "mph"
+                else -> "kts"
+            }
+            prefs.edit().putString("unit_speed", unit).apply()
+        }
+
+        // Altitude
+        when (prefs.getString("unit_alt", "ft")) {
+            "ft" -> findViewById<RadioButton>(R.id.rbAltFt).isChecked = true
+            "m" -> findViewById<RadioButton>(R.id.rbAltM).isChecked = true
+        }
+
+        findViewById<RadioGroup>(R.id.rgAltUnits).setOnCheckedChangeListener { _, checkedId ->
+            val unit = if (checkedId == R.id.rbAltM) "m" else "ft"
+            prefs.edit().putString("unit_alt", unit).apply()
+        }
+
+        // Climb Rate
+        when (prefs.getString("unit_climb", "fpm")) {
+            "fpm" -> findViewById<RadioButton>(R.id.rbClimbFpm).isChecked = true
+            "ms" -> findViewById<RadioButton>(R.id.rbClimbMs).isChecked = true
+        }
+
+        findViewById<RadioGroup>(R.id.rgClimbUnits).setOnCheckedChangeListener { _, checkedId ->
+            val unit = if (checkedId == R.id.rbClimbMs) "ms" else "fpm"
+            prefs.edit().putString("unit_climb", unit).apply()
         }
 
         updateCacheSize()

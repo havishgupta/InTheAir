@@ -6,89 +6,117 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     tools:context=".SettingsActivity">
-
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Settings"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvOfflineMaps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Offline Maps"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
-
-    <TextView
-        android:id="@+id/tvCacheSize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Current Cache Size: Calculating..."
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvOfflineMaps" />
-
-    <Button
-        android:id="@+id/btnClearCache"
+    
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Clear Offline Maps Cache"
-        android:backgroundTint="#FF3B30"
-        android:textColor="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/tvCacheSize" />
-
-    <Button
-        android:id="@+id/btnViewOffline"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="View Downloaded Maps"
-        android:backgroundTint="#007AFF"
-        android:textColor="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/btnClearCache" />
-
-    <TextView
-        android:id="@+id/tvUnits"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Units"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnViewOffline" />
-
-    <RadioGroup
-        android:id="@+id/rgSpeedUnits"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/tvUnits">
-
-        <RadioButton
-            android:id="@+id/rbKnots"
-            android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Knots / Feet"
-            android:checked="true"/>
+            android:orientation="vertical">
 
-        <RadioButton
-            android:id="@+id/rbMetric"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="km/h / Meters"
-            android:layout_marginStart="16dp"/>
-    </RadioGroup>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Settings"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Offline Maps"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvCacheSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Current Cache Size: Calculating..." />
+
+            <Button
+                android:id="@+id/btnClearCache"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Clear Offline Maps Cache"
+                android:backgroundTint="#FF3B30"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnViewOffline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="View Downloaded Maps"
+                android:backgroundTint="#007AFF"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Units"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Speed Units -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Speed"
+                android:textStyle="bold" />
+            
+            <RadioGroup
+                android:id="@+id/rgSpeedUnits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton android:id="@+id/rbSpeedKts" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Knots" android:checked="true"/>
+                <RadioButton android:id="@+id/rbSpeedKmh" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="km/h" android:layout_marginStart="8dp"/>
+                <RadioButton android:id="@+id/rbSpeedMph" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="mph" android:layout_marginStart="8dp"/>
+            </RadioGroup>
+
+            <!-- Altitude Units -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Altitude"
+                android:textStyle="bold" />
+            
+            <RadioGroup
+                android:id="@+id/rgAltUnits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton android:id="@+id/rbAltFt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Feet" android:checked="true"/>
+                <RadioButton android:id="@+id/rbAltM" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Meters" android:layout_marginStart="16dp"/>
+            </RadioGroup>
+
+            <!-- Climb Rate Units -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Climb Rate"
+                android:textStyle="bold" />
+            
+            <RadioGroup
+                android:id="@+id/rgClimbUnits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton android:id="@+id/rbClimbFpm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ft/min" android:checked="true"/>
+                <RadioButton android:id="@+id/rbClimbMs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="m/s" android:layout_marginStart="16dp"/>
+            </RadioGroup>
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
