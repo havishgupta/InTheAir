@@ -536,6 +536,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             
             map.setTileProvider(tileProvider)
             map.setTileSource(tileSource)
+            map.setUseDataConnection(false) // Disable online tile fetching for better offline performance
             map.controller.setZoom(10.0) // reset zoom to ensure tiles load
             
             Toast.makeText(this, "Offline vector map loaded successfully!", Toast.LENGTH_LONG).show()
@@ -553,10 +554,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE
         )
-        
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
 
         val needed = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
@@ -572,7 +569,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                              ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            if (hasLocation) {
                 locationOverlay.enableMyLocation()
                 startLocationUpdates()
             }
@@ -580,9 +579,18 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
     
     private fun startLocationUpdates() {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 1f, this)
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 1f, this)
+            }
+        }
+        
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 1f, this)
+            }
         }
     }
 
