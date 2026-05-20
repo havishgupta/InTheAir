@@ -19,6 +19,13 @@ class SettingsActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
 
+        // Offline Maps Only
+        val switchOffline = findViewById<android.widget.Switch>(R.id.switchOfflineOnly)
+        switchOffline.isChecked = prefs.getBoolean("offline_maps_only", false)
+        switchOffline.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("offline_maps_only", isChecked).apply()
+        }
+
         // Speed
         when (prefs.getString("unit_speed", "kts")) {
             "kts" -> findViewById<RadioButton>(R.id.rbSpeedKts).isChecked = true

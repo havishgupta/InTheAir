@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#1C1C1E">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,90 +14,72 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Plan Route &amp; Download Offline Maps"
-            android:textSize="18sp"
+            android:text="Offline Maps 🗺️"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <AutoCompleteTextView
-            android:id="@+id/etFrom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Departure (City or Airport)"
-            android:inputType="textCapWords"
-            android:completionThreshold="2"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:dropDownWidth="match_parent"
-            android:dropDownHeight="200dp"
-            android:layout_marginBottom="8dp"/>
-
-        <AutoCompleteTextView
-            android:id="@+id/etTo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Destination (City or Airport)"
-            android:inputType="textCapWords"
-            android:completionThreshold="2"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:dropDownWidth="match_parent"
-            android:dropDownHeight="200dp"
-            android:layout_marginBottom="16dp"/>
-
-        <Button
-            android:id="@+id/btnDownload"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Download Route Maps"
-            android:backgroundTint="#007AFF"
-            android:textColor="#FFFFFF"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#33FFFFFF"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Or download maps another way:"
+            android:text="To use maps offline while flying, download a '.map' vector file from OpenAndroMaps to your device, then load it here."
+            android:textColor="#BBBBBB"
             android:textSize="14sp"
-            android:layout_marginBottom="8dp"/>
-
-        <Button
-            android:id="@+id/btnDownloadManual"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Download Current Map View"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="8dp"/>
-
-        <Button
-            android:id="@+id/btnDownloadIndia"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🇮🇳 Download All India Maps"
-            android:backgroundTint="#FF9800"
-            android:textColor="#FFFFFF"
+            android:lineSpacingExtra="4dp"
             android:layout_marginBottom="16dp"/>
 
-        <View
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#33FFFFFF"
-            android:layout_marginBottom="16dp"/>
+            android:layout_height="wrap_content"
+            android:text="👉 https://www.openandromaps.org/en/downloads"
+            android:autoLink="web"
+            android:textColorLink="#00E5FF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
 
         <Button
             android:id="@+id/btnLoadMapFile"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:text="📁 Load Offline .map File"
-            android:backgroundTint="#9C27B0"
-            android:textColor="#FFFFFF"/>
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1C1C1E"
+            android:backgroundTint="#00E5FF"/>
+
+        <!-- Kept for compatibility but hidden as requested -->
+        <AutoCompleteTextView
+            android:id="@+id/etFrom"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <AutoCompleteTextView
+            android:id="@+id/etTo"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnDownloadManual"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnDownloadIndia"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

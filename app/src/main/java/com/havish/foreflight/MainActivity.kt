@@ -516,10 +516,22 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     private fun checkForSavedMapFile() {
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val offlineOnly = prefs.getBoolean("offline_maps_only", false)
+        
+        if (!offlineOnly) {
+            // Revert to online maps if setting is disabled
+            map.setTileSource(TileSourceFactory.MAPNIK)
+            map.setUseDataConnection(true)
+            return
+        }
+
         val mapsDir = File(filesDir, "mapsforge")
         val mapFile = File(mapsDir, "offline_map.map")
         if (mapFile.exists()) {
             loadMapsforgeFile(mapFile)
+        } else {
+            Toast.makeText(this, "Offline maps only is enabled, but no map file is loaded. Please load a map.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -677,6 +689,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         map.onResume()
         locationOverlay.enableMyLocation()
         startLocationUpdates()
+        checkForSavedMapFile() // Re-check in case settings changed
     }
 
     override fun onPause() {
