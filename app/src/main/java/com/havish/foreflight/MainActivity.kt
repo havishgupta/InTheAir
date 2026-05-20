@@ -168,7 +168,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     private suspend fun geocodeCity(city: String): GeoPoint? = withContext(Dispatchers.IO) {
         val url = "https://nominatim.openstreetmap.org/search?q=${city.replace(" ", "+")}&format=json&limit=1"
-        val request = Request.Builder().url(url).header("User-Agent", "ForeflightClone").build()
+        val request = Request.Builder()
+            .url(url)
+            .header("User-Agent", "ForeflightClone/1.0 (test@example.com)") // Nominatim requires valid User-Agent
+            .build()
         try {
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
@@ -194,7 +197,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val zoomMin = 5
         val zoomMax = 11
 
-        cacheManager.downloadAreaAsync(this, boundingBox, zoomMin, zoomMax, object : CacheManager.CacheManagerCallback {
+        cacheManager.downloadAreaAsyncNoUI(this, boundingBox, zoomMin, zoomMax, object : CacheManager.CacheManagerCallback {
             override fun onTaskComplete() {
                 runOnUiThread {
                     Toast.makeText(this@MainActivity, "Offline map download complete!", Toast.LENGTH_LONG).show()

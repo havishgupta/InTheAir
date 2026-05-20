@@ -41,6 +41,10 @@ class SettingsActivity : AppCompatActivity() {
                 updateCacheSize()
             }
         }
+
+        findViewById<Button>(R.id.btnViewOffline).setOnClickListener {
+            startActivity(android.content.Intent(this, OfflineMapsActivity::class.java))
+        }
     }
 
     private fun updateCacheSize() {
