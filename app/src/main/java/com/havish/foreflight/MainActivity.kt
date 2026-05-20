@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.drawable.Drawable
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
@@ -16,6 +15,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -28,6 +28,8 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
@@ -39,7 +41,6 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
-import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.roundToInt
 
@@ -148,15 +149,40 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val geocoder = Geocoder(this@MainActivity)
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line)
         editText.setAdapter(adapter)
+        editText.threshold = 2
+
+        // Flag to prevent re-querying when user selects an item from dropdown
+        var isUserSelecting = false
+        // Debounce job to avoid flooding the geocoder on every keystroke
+        var searchJob: Job? = null
+
+        // When user taps an item from the dropdown, lock in the selection
+        editText.setOnItemClickListener { parent, _, position, _ ->
+            isUserSelecting = true
+            val selected = parent.getItemAtPosition(position) as String
+            editText.setText(selected)
+            editText.setSelection(selected.length)
+            editText.dismissDropDown()
+            // Reset the flag after a short delay so further typing works again
+            editText.postDelayed({ isUserSelecting = false }, 300)
+        }
 
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                if (s != null && s.length > 2) {
-                    scope.launch(Dispatchers.IO) {
+                // Don't re-query when an item was just selected from the dropdown
+                if (isUserSelecting) return
+
+                val query = s?.toString()?.trim() ?: ""
+                if (query.length >= 2) {
+                    // Cancel previous search to debounce
+                    searchJob?.cancel()
+                    searchJob = scope.launch {
+                        // Small delay to debounce rapid typing
+                        delay(300)
                         try {
-                            val addresses = geocoder.getFromLocationName(s.toString(), 5)
-                            if (!addresses.isNullOrEmpty()) {
-                                val results = addresses.mapNotNull {
+                            val results = withContext(Dispatchers.IO) {
+                                val addresses = geocoder.getFromLocationName(query, 5)
+                                addresses?.mapNotNull {
                                     val name = it.featureName ?: ""
                                     val locality = it.locality ?: ""
                                     val adminArea = it.adminArea ?: ""
@@ -165,24 +191,50 @@ class MainActivity : AppCompatActivity(), LocationListener {
                                         .filter { part -> part.isNotBlank() }
                                         .distinct()
                                         .joinToString(", ")
-                                }.distinct()
-                                
-                                withContext(Dispatchers.Main) {
-                                    adapter.clear()
-                                    adapter.addAll(results)
-                                    adapter.notifyDataSetChanged()
+                                }?.filter { it.isNotBlank() }?.distinct() ?: emptyList()
+                            }
+
+                            if (results.isNotEmpty()) {
+                                adapter.clear()
+                                adapter.addAll(results)
+                                adapter.notifyDataSetChanged()
+                                // Force the dropdown to show — needed inside AlertDialog
+                                if (editText.isFocused && !isUserSelecting) {
+                                    editText.post {
+                                        try {
+                                            editText.showDropDown()
+                                        } catch (e: Exception) {
+                                            Log.w("AutoComplete", "Could not show dropdown: ${e.message}")
+                                        }
+                                    }
                                 }
                             }
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            Log.e("AutoComplete", "Geocoding error: ${e.message}", e)
                         }
                     }
+                } else {
+                    adapter.clear()
+                    adapter.notifyDataSetChanged()
                 }
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+
+        // Also show dropdown when the field gains focus if it already has content
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus && adapter.count > 0 && !isUserSelecting) {
+                editText.post {
+                    try {
+                        editText.showDropDown()
+                    } catch (e: Exception) {
+                        Log.w("AutoComplete", "Could not show dropdown on focus: ${e.message}")
+                    }
+                }
+            }
+        }
     }
     
     private fun showRoutePlanDialog() {
@@ -191,6 +243,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val etTo = view.findViewById<AutoCompleteTextView>(R.id.etTo)
         val btnDownload = view.findViewById<Button>(R.id.btnDownload)
         val btnDownloadManual = view.findViewById<Button>(R.id.btnDownloadManual)
+        val btnDownloadIndia = view.findViewById<Button>(R.id.btnDownloadIndia)
 
         setupAutoComplete(etFrom)
         setupAutoComplete(etTo)
@@ -201,8 +254,19 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         btnDownloadManual.setOnClickListener {
             dialog.dismiss()
-            val boundingBox = map.boundingBox
-            downloadMapArea(boundingBox)
+            try {
+                val boundingBox = map.boundingBox
+                Log.d("MapDownload", "Manual download bounding box: $boundingBox")
+                downloadMapArea(boundingBox)
+            } catch (e: Exception) {
+                Log.e("MapDownload", "Error getting bounding box: ${e.message}", e)
+                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        btnDownloadIndia.setOnClickListener {
+            dialog.dismiss()
+            downloadIndiaMap()
         }
 
         btnDownload.setOnClickListener {
@@ -231,11 +295,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
                         val boundingBox = BoundingBox(maxLat, maxLon, minLat, minLon)
                         map.zoomToBoundingBox(boundingBox, true)
 
+                        // Small delay to let the map settle before downloading
+                        delay(500)
                         downloadMapArea(boundingBox)
                     } else {
                         Toast.makeText(this@MainActivity, "Failed to find one or both locations.", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
+                    Log.e("MapDownload", "Route download error: ${e.message}", e)
                     Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -258,36 +325,150 @@ class MainActivity : AppCompatActivity(), LocationListener {
         return@withContext null
     }
 
+    /**
+     * Downloads map tiles for the given bounding box using osmdroid's built-in
+     * download dialog, which handles progress UI and threading safely.
+     */
     private fun downloadMapArea(boundingBox: BoundingBox) {
-        val cacheManager = CacheManager(map)
-        val zoomMin = 5
-        val zoomMax = 11
+        try {
+            Log.d("MapDownload", "Starting download for bounding box: N=${boundingBox.latNorth}, S=${boundingBox.latSouth}, E=${boundingBox.lonEast}, W=${boundingBox.lonWest}")
 
-        cacheManager.downloadAreaAsyncNoUI(this, boundingBox, zoomMin, zoomMax, object : CacheManager.CacheManagerCallback {
-            override fun onTaskComplete() {
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Offline map download complete!", Toast.LENGTH_LONG).show()
+            // Validate bounding box
+            if (boundingBox.latNorth <= boundingBox.latSouth || boundingBox.lonEast <= boundingBox.lonWest) {
+                Toast.makeText(this, "Invalid map area. Please try again.", Toast.LENGTH_LONG).show()
+                Log.e("MapDownload", "Invalid bounding box!")
+                return
+            }
+
+            val cacheManager = CacheManager(map)
+            val zoomMin = 5
+            val zoomMax = 10
+
+            // Use osmdroid's built-in download with dialog — this is the most stable approach.
+            // It handles its own progress dialog, threading, and error handling internally.
+            cacheManager.downloadAreaAsync(
+                this,          // Activity context for dialog
+                boundingBox,
+                zoomMin,
+                zoomMax
+            )
+
+            Log.d("MapDownload", "downloadAreaAsync started successfully")
+        } catch (e: Exception) {
+            Log.e("MapDownload", "Exception starting download: ${e.message}", e)
+            Toast.makeText(this, "Failed to start download: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /**
+     * Downloads the entire map of India in regional chunks to avoid
+     * overwhelming the tile server or running out of memory.
+     * India bounding box: ~6°N to ~37°N, ~68°E to ~98°E
+     * Split into 4 quadrants for manageable downloads.
+     */
+    private fun downloadIndiaMap() {
+        // India's approximate bounding box, split into 4 regional chunks
+        val regions = listOf(
+            // South India: ~6N-22N, 68E-83E (Kerala, TN, Karnataka, AP, Goa, Maharashtra south)
+            Pair("South-West India", BoundingBox(22.0, 83.0, 6.0, 68.0)),
+            // South-East India: ~6N-22N, 83E-98E (TN east, Odisha, WB south, NE south)
+            Pair("South-East India", BoundingBox(22.0, 98.0, 6.0, 83.0)),
+            // North-West India: ~22N-37N, 68E-83E (Rajasthan, Gujarat, UP, J&K west)
+            Pair("North-West India", BoundingBox(37.0, 83.0, 22.0, 68.0)),
+            // North-East India: ~22N-37N, 83E-98E (Bihar, NE states, UP east)
+            Pair("North-East India", BoundingBox(37.0, 98.0, 22.0, 83.0))
+        )
+
+        // Zoom levels 3-8 for a country-wide overview (manageable tile count)
+        val zoomMin = 3
+        val zoomMax = 8
+
+        AlertDialog.Builder(this)
+            .setTitle("Download All India Maps")
+            .setMessage(
+                "This will download the entire India map in 4 regional chunks " +
+                "at zoom levels $zoomMin-$zoomMax.\n\n" +
+                "This may take several minutes and use ~100-200 MB of storage.\n\n" +
+                "Make sure you are on Wi-Fi before proceeding."
+            )
+            .setPositiveButton("Download") { _, _ ->
+                downloadRegionsSequentially(regions, zoomMin, zoomMax, 0)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    /**
+     * Downloads regions one after another to avoid overloading.
+     */
+    private fun downloadRegionsSequentially(
+        regions: List<Pair<String, BoundingBox>>,
+        zoomMin: Int,
+        zoomMax: Int,
+        index: Int
+    ) {
+        if (index >= regions.size) {
+            Toast.makeText(this, "All India map regions downloaded!", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val (name, bb) = regions[index]
+        Log.d("MapDownload", "Downloading region $name (${index + 1}/${regions.size})")
+        Toast.makeText(this, "Downloading $name (${index + 1}/${regions.size})...", Toast.LENGTH_SHORT).show()
+
+        try {
+            val cacheManager = CacheManager(map)
+            cacheManager.downloadAreaAsyncNoUI(
+                this,
+                bb,
+                zoomMin,
+                zoomMax,
+                object : CacheManager.CacheManagerCallback {
+                    override fun onTaskComplete() {
+                        Log.d("MapDownload", "Region $name complete")
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "$name downloaded! (${index + 1}/${regions.size})",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            // Download next region
+                            downloadRegionsSequentially(regions, zoomMin, zoomMax, index + 1)
+                        }
+                    }
+
+                    override fun onTaskFailed(errors: Int) {
+                        Log.e("MapDownload", "Region $name failed with $errors errors")
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "$name had $errors errors. Continuing...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            // Continue with next region even if this one had errors
+                            downloadRegionsSequentially(regions, zoomMin, zoomMax, index + 1)
+                        }
+                    }
+
+                    override fun updateProgress(progress: Int, currentZoomLevel: Int, zoomMin: Int, zoomMax: Int) {
+                        Log.d("MapDownload", "$name progress: $progress% (zoom $currentZoomLevel)")
+                    }
+
+                    override fun downloadStarted() {
+                        Log.d("MapDownload", "$name download started")
+                    }
+
+                    override fun setPossibleTilesInArea(total: Int) {
+                        Log.d("MapDownload", "$name: $total tiles")
+                    }
                 }
-            }
-
-            override fun onTaskFailed(errors: Int) {
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Download failed with $errors errors.", Toast.LENGTH_LONG).show()
-                }
-            }
-
-            override fun updateProgress(progress: Int, currentZoomLevel: Int, zoomMin: Int, zoomMax: Int) {
-                // Background download progress
-            }
-
-            override fun downloadStarted() {
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Download started...", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun setPossibleTilesInArea(total: Int) {}
-        })
+            )
+        } catch (e: Exception) {
+            Log.e("MapDownload", "Exception downloading $name: ${e.message}", e)
+            Toast.makeText(this, "Error downloading $name: ${e.message}", Toast.LENGTH_LONG).show()
+            // Try next region
+            downloadRegionsSequentially(regions, zoomMin, zoomMax, index + 1)
+        }
     }
 
     private fun requestPermissions() {
