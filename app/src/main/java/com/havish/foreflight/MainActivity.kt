@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                         tvStatus.text = "Failed to find one or both locations."
                     }
                 } catch (e: Exception) {
-                    tvStatus.text = "Error: \${e.message}"
+                    tvStatus.text = "Error: ${e.message}"
                 }
             }
         }
