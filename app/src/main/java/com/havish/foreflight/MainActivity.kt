@@ -527,9 +527,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             MapsForgeTileSource.createInstance(application)
             val tileSource = MapsForgeTileSource.createFromFiles(arrayOf(file))
             val tileProvider = MapsForgeTileProvider(
-                org.osmdroid.tileprovider.IRegisterReceiver { receiver, filter ->
-                    this.registerReceiver(receiver, filter)
-                },
+                org.osmdroid.tileprovider.util.SimpleRegisterReceiver(this),
                 tileSource,
                 null
             )

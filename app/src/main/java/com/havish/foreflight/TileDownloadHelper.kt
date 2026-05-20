@@ -104,6 +104,7 @@ class TileDownloadHelper(private val mapView: MapView) {
                                     // Rate limited — back off
                                     delay(3000)
                                 }
+                                Unit
                             }
                         }
                     } catch (e: Exception) {
