@@ -49,4 +49,9 @@ dependencies {
     
     // OkHttp for reverse geocoding API
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Mapsforge for offline vector maps
+    implementation("org.osmdroid:osmdroid-mapsforge:6.1.18")
+    implementation("org.mapsforge:mapsforge-map-android:0.13.0")
+    implementation("org.mapsforge:mapsforge-themes:0.13.0")
 }

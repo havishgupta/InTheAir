@@ -22,6 +22,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -39,7 +40,11 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import org.osmdroid.mapsforge.MapsForgeTileSource
+import org.osmdroid.mapsforge.MapsForgeTileProvider
+import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.atan2
 import kotlin.math.roundToInt
 
@@ -60,8 +65,19 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private var lastLocation: Location? = null
     private var downloadJob: Job? = null
 
+    // Launcher for selecting a .map file
+    private val mapFilePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            importAndLoadMapFile(uri)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize Mapsforge graphics factory before anything else
+        AndroidGraphicFactory.createInstance(application)
+
         
         // Setup OSMDroid config to use internal storage to avoid crashes on Android 10+
         val ctx = applicationContext
@@ -94,6 +110,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
         setupLocationOverlay()
         setupUI()
         requestPermissions()
+        
+        // Check for existing loaded map file
+        checkForSavedMapFile()
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        AndroidGraphicFactory.clearResourceMemoryCache()
     }
 
     private fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bitmap {
@@ -244,6 +268,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val btnDownload = view.findViewById<Button>(R.id.btnDownload)
         val btnDownloadManual = view.findViewById<Button>(R.id.btnDownloadManual)
         val btnDownloadIndia = view.findViewById<Button>(R.id.btnDownloadIndia)
+        val btnLoadMapFile = view.findViewById<Button>(R.id.btnLoadMapFile)
 
         setupAutoComplete(etFrom)
         setupAutoComplete(etTo)
@@ -267,6 +292,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
         btnDownloadIndia.setOnClickListener {
             dialog.dismiss()
             downloadIndiaMap()
+        }
+
+        btnLoadMapFile.setOnClickListener {
+            dialog.dismiss()
+            // Open file picker for all file types (to allow .map selection)
+            mapFilePicker.launch(arrayOf("*/*"))
         }
 
         btnDownload.setOnClickListener {
@@ -441,6 +472,74 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    /**
+     * Copies the selected file URI to internal storage and loads it into Mapsforge.
+     */
+    private fun importAndLoadMapFile(uri: android.net.Uri) {
+        val progressDialog = AlertDialog.Builder(this)
+            .setTitle("Importing Map")
+            .setMessage("Please wait while the map file is copied to the app's secure storage...")
+            .setCancelable(false)
+            .create()
+        progressDialog.show()
+
+        scope.launch {
+            try {
+                val mapsDir = File(filesDir, "mapsforge")
+                mapsDir.mkdirs()
+                
+                // Clear old maps to save space
+                mapsDir.listFiles()?.forEach { it.delete() }
+
+                val destFile = File(mapsDir, "offline_map.map")
+
+                withContext(Dispatchers.IO) {
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        FileOutputStream(destFile).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+
+                progressDialog.dismiss()
+                loadMapsforgeFile(destFile)
+                
+            } catch (e: Exception) {
+                progressDialog.dismiss()
+                Log.e("Mapsforge", "Error importing map: ${e.message}", e)
+                Toast.makeText(this@MainActivity, "Failed to import map: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun checkForSavedMapFile() {
+        val mapsDir = File(filesDir, "mapsforge")
+        val mapFile = File(mapsDir, "offline_map.map")
+        if (mapFile.exists()) {
+            loadMapsforgeFile(mapFile)
+        }
+    }
+
+    private fun loadMapsforgeFile(file: File) {
+        try {
+            MapsForgeTileSource.createInstance(application)
+            val tileSource = MapsForgeTileSource.createFromFiles(arrayOf(file))
+            val tileProvider = MapsForgeTileProvider(
+                org.osmdroid.tileprovider.IRegisterReceiver { receiver, filter ->
+                    this.registerReceiver(receiver, filter)
+                },
+                tileSource,
+                null
+            )
+            
+            map.setTileProvider(tileProvider)
+            Toast.makeText(this, "Offline vector map loaded successfully!", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Log.e("Mapsforge", "Error loading map: ${e.message}", e)
+            Toast.makeText(this, "Failed to load offline map: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun requestPermissions() {
