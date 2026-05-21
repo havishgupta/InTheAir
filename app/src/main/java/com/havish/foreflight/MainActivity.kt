@@ -69,6 +69,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvClimb: TextView
     private lateinit var tvClimbAngle: TextView
 
+    private lateinit var cardDebugMode: CardView
+    private lateinit var tvDebugLatLon: TextView
+    private lateinit var tvDebugAcc: TextView
+    private lateinit var tvDebugRawSpeed: TextView
+    private lateinit var tvDebugRawAlt: TextView
+    private lateinit var tvDebugBearing: TextView
+    private lateinit var ivCompassArrow: ImageView
+
     private var lastAlt = 0.0
     private var lastTime = 0L
     private var lastLocation: Location? = null
@@ -113,10 +121,11 @@ class MainActivity : AppCompatActivity() {
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
-        map.controller.setZoom(10.0)
         
-        // Default location to Mumbai if no GPS initially
-        map.controller.setCenter(GeoPoint(19.0760, 72.8777))
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val initialZoom = prefs.getFloat("initial_zoom", 14.0f).toDouble()
+        map.controller.setZoom(initialZoom)
+        // Removed default Mumbai location - waiting for GPS
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setupLocationCallback()
@@ -182,11 +191,13 @@ class MainActivity : AppCompatActivity() {
             showRoutePlanDialog()
         }
 
-        val cardOfflineMode = findViewById<CardView>(R.id.cardOfflineMode)
-        val ivCloseOfflineMode = findViewById<ImageView>(R.id.ivCloseOfflineMode)
-        ivCloseOfflineMode.setOnClickListener {
-            cardOfflineMode.visibility = View.GONE
-        }
+        cardDebugMode = findViewById(R.id.cardDebugMode)
+        tvDebugLatLon = findViewById(R.id.tvDebugLatLon)
+        tvDebugAcc = findViewById(R.id.tvDebugAcc)
+        tvDebugRawSpeed = findViewById(R.id.tvDebugRawSpeed)
+        tvDebugRawAlt = findViewById(R.id.tvDebugRawAlt)
+        tvDebugBearing = findViewById(R.id.tvDebugBearing)
+        ivCompassArrow = findViewById(R.id.ivCompassArrow)
     }
     
     private fun setupAutoComplete(editText: AutoCompleteTextView) {
@@ -532,12 +543,7 @@ class MainActivity : AppCompatActivity() {
         val offlineOnly = prefs.getBoolean("offline_maps_only", false)
         val activeMapName = prefs.getString("active_offline_map", null)
         
-        val cardOfflineMode = findViewById<CardView>(R.id.cardOfflineMode)
-        if (offlineOnly) {
-            cardOfflineMode.visibility = View.VISIBLE
-        } else {
-            cardOfflineMode.visibility = View.GONE
-        }
+        cardDebugMode.visibility = if (prefs.getBoolean("debug_mode", false)) View.VISIBLE else View.GONE
 
         if (!offlineOnly) {
             map.setTileSource(TileSourceFactory.MAPNIK)
@@ -577,9 +583,12 @@ class MainActivity : AppCompatActivity() {
             map.setTileProvider(tileProvider)
             map.setTileSource(tileSource)
             map.setUseDataConnection(false)
-            map.controller.setZoom(10.0)
             
-            Toast.makeText(this, "Offline map loaded: ${file.name}", Toast.LENGTH_SHORT).show()
+            val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+            val initialZoom = prefs.getFloat("initial_zoom", 14.0f).toDouble()
+            map.controller.setZoom(initialZoom)
+            
+            // Removed offline map loaded toast
         } catch (e: Throwable) {
             Toast.makeText(this, "Failed to load offline map: ${e.message}", Toast.LENGTH_LONG).show()
         }
