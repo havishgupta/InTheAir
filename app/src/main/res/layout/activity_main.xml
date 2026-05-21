@@ -225,46 +225,54 @@
             app:tint="#FFFFFF" />
     </LinearLayout>
 
-    <!-- Offline Mode Popup (Dismissable) -->
+    <!-- Debug Mode Panel -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardOfflineMode"
+        android:id="@+id/cardDebugMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
+        android:layout_marginStart="16dp"
         android:visibility="gone"
-        app:cardBackgroundColor="#E6D32F2F"
+        app:cardBackgroundColor="#D91E1E24"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp">
+            android:padding="16dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Offline Mode"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:layout_marginEnd="12dp" />
+                android:orientation="vertical"
+                android:layout_marginEnd="16dp">
+                <TextView android:id="@+id/tvDebugLatLon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Lat: -- \nLon: --" />
+                <TextView android:id="@+id/tvDebugAcc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Acc: --" />
+                <TextView android:id="@+id/tvDebugRawSpeed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Speed (m/s): --" />
+                <TextView android:id="@+id/tvDebugRawAlt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Alt (m): --" />
+                <TextView android:id="@+id/tvDebugBearing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Bearing: --" />
+            </LinearLayout>
 
-            <ImageView
-                android:id="@+id/ivCloseOfflineMode"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                app:tint="#FFFFFF"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"/>
+            <RelativeLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="N 0°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S 180°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="W 270°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentStart="true" android:layout_centerVertical="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="E 90°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentEnd="true" android:layout_centerVertical="true"/>
+                
+                <ImageView
+                    android:id="@+id/ivCompassArrow"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerInParent="true"
+                    android:src="@android:drawable/arrow_up_float"
+                    app:tint="#4DB6AC"/>
+            </RelativeLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

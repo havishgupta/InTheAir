@@ -717,16 +717,29 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Heading
+        var currentBearing = 0f
         if (location.hasBearing()) {
-            tvHeading.text = String.format("%03d°", location.bearing.toInt())
+            currentBearing = location.bearing
+            tvHeading.text = String.format("%03d°", currentBearing.toInt())
         } else if (lastLocation != null) {
             val distance = lastLocation!!.distanceTo(location)
             if (distance > 0.5f) { 
-                var bearing = lastLocation!!.bearingTo(location)
-                if (bearing < 0) bearing += 360f
-                tvHeading.text = String.format("%03d°", bearing.toInt())
+                currentBearing = lastLocation!!.bearingTo(location)
+                if (currentBearing < 0) currentBearing += 360f
+                tvHeading.text = String.format("%03d°", currentBearing.toInt())
             }
         }
+
+        // Update Debug Mode UI if active
+        if (prefs.getBoolean("debug_mode", false)) {
+            tvDebugLatLon.text = String.format("Lat: %.6f\nLon: %.6f", location.latitude, location.longitude)
+            tvDebugAcc.text = if (location.hasAccuracy()) String.format("Acc: %.1fm", location.accuracy) else "Acc: --"
+            tvDebugRawSpeed.text = if (location.hasSpeed()) String.format("Speed (m/s): %.2f", location.speed) else "Speed (m/s): --"
+            tvDebugRawAlt.text = if (location.hasAltitude()) String.format("Alt (m): %.2f", location.altitude) else "Alt (m): --"
+            tvDebugBearing.text = String.format("Bearing: %.1f°", currentBearing)
+            ivCompassArrow.rotation = currentBearing
+        }
+
         lastLocation = location
     }
 

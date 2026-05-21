@@ -44,6 +44,29 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putString("unit_speed", unit).apply()
         }
 
+        // Initial Zoom
+        when (prefs.getFloat("initial_zoom", 14.0f)) {
+            10.0f -> findViewById<RadioButton>(R.id.rbZoomFar).isChecked = true
+            18.0f -> findViewById<RadioButton>(R.id.rbZoomClose).isChecked = true
+            else -> findViewById<RadioButton>(R.id.rbZoomMedium).isChecked = true
+        }
+
+        findViewById<RadioGroup>(R.id.rgInitialZoom).setOnCheckedChangeListener { _, checkedId ->
+            val zoom = when (checkedId) {
+                R.id.rbZoomFar -> 10.0f
+                R.id.rbZoomClose -> 18.0f
+                else -> 14.0f
+            }
+            prefs.edit().putFloat("initial_zoom", zoom).apply()
+        }
+
+        // Debug Mode
+        val switchDebug = findViewById<android.widget.Switch>(R.id.switchDebugMode)
+        switchDebug.isChecked = prefs.getBoolean("debug_mode", false)
+        switchDebug.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("debug_mode", isChecked).apply()
+        }
+
         // Altitude
         when (prefs.getString("unit_alt", "m")) {
             "ft" -> findViewById<RadioButton>(R.id.rbAltFt).isChecked = true
