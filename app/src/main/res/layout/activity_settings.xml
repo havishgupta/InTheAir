@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#121212"
     tools:context=".SettingsActivity">
     
     <ScrollView
@@ -20,229 +20,198 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SYSTEM CFG"
-                android:textColor="#0FFFFF"
+                android:text="Settings"
+                android:textColor="#FFFFFF"
                 android:textSize="28sp"
-                android:letterSpacing="0.2"
-                android:fontFamily="monospace"
                 android:textStyle="bold"
-                android:layout_marginBottom="32dp" />
+                android:layout_marginBottom="24dp" />
 
-            <!-- Core Operations Section -->
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#111111"
-                android:orientation="vertical"
-                android:padding="24dp"
+                app:cardBackgroundColor="#1E1E24"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
                 android:layout_marginBottom="24dp">
                 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="> NAV_SYS"
-                    android:textColor="#FF00FF"
-                    android:fontFamily="monospace"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="24dp"/>
-
-                <Button
-                    android:id="@+id/btnDownloadRouteMap"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:text="[ INITIATE ROUTE DL ]"
-                    android:backgroundTint="#000000"
-                    android:textColor="#0FFFFF"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.1"
-                    app:strokeColor="#0FFFFF"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="0dp"
-                    android:layout_marginBottom="16dp"/>
-
-                <Button
-                    android:id="@+id/btnViewOffline"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:text="[ ARCHIVE MGR ]"
-                    android:backgroundTint="#000000"
-                    android:textColor="#FF00FF"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.1"
-                    app:strokeColor="#FF00FF"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="0dp"
-                    android:layout_marginBottom="24dp"/>
-
-                <Switch
-                    android:id="@+id/switchOfflineOnly"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="FORCE_OFFLINE"
-                    android:fontFamily="monospace"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Offline Maps"
+                        android:textColor="#4DB6AC"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="// Restricts net operations"
-                    android:fontFamily="monospace"
-                    android:textSize="10sp"
-                    android:textColor="#888888"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="24dp"/>
+                    <Switch
+                        android:id="@+id/switchOfflineOnly"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Offline Maps Only"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/tvCacheSize"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#0FFFFF"
-                    android:fontFamily="monospace"
-                    android:text="CACHE_MEM: -- MB"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="12dp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="If disabled, online maps will load by default."
+                        android:textSize="12sp"
+                        android:textColor="#A0A0A0"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="24dp"/>
 
-                <Button
-                    android:id="@+id/btnClearCache"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="PURGE MEM"
-                    android:backgroundTint="#FF0000"
-                    android:textColor="#FFFFFF"
-                    android:fontFamily="monospace"
-                    app:cornerRadius="0dp" />
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvCacheSize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:text="Current Cache Size: Calculating..."
+                        android:layout_marginBottom="12dp" />
 
-            <!-- Metrics Configuration Section -->
-            <LinearLayout
+                    <Button
+                        android:id="@+id/btnClearCache"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="Clear Cached Tiles"
+                        android:backgroundTint="#D32F2F"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginBottom="8dp"/>
+
+                    <Button
+                        android:id="@+id/btnViewOffline"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="Manage Offline Maps"
+                        android:backgroundTint="#4DB6AC"
+                        android:textColor="#121212" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#111111"
-                android:orientation="vertical"
-                android:padding="24dp">
+                app:cardBackgroundColor="#1E1E24"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="> SENSOR_UNITS"
-                    android:textColor="#FF00FF"
-                    android:fontFamily="monospace"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="24dp"/>
-
-                <!-- Speed Units -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#FFFFFF"
-                    android:fontFamily="monospace"
-                    android:text="VELOCITY_MODE"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"/>
-                
-                <RadioGroup
-                    android:id="@+id/rgSpeedUnits"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <RadioButton android:id="@+id/rbSpeedKmh" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="KM/H"/>
-                    <RadioButton android:id="@+id/rbSpeedKts" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="KNOTS" />
-                    <RadioButton android:id="@+id/rbSpeedMph" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MPH" />
-                    <RadioButton android:id="@+id/rbSpeedMach" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MACH" />
-                </RadioGroup>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="24dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Units"
+                        android:textColor="#4DB6AC"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
 
-                <!-- Altitude Units -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#FFFFFF"
-                    android:fontFamily="monospace"
-                    android:text="ALTITUDE_MODE"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"/>
-                
-                <RadioGroup
-                    android:id="@+id/rgAltUnits"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <RadioButton android:id="@+id/rbAltM" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="METERS"/>
-                    <RadioButton android:id="@+id/rbAltFt" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FEET" />
-                    <RadioButton android:id="@+id/rbAltKm" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="KILOMETERS" />
-                </RadioGroup>
+                    <!-- Speed Units -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:text="Speed"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+                    
+                    <RadioGroup
+                        android:id="@+id/rgSpeedUnits"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <RadioButton android:id="@+id/rbSpeedKmh" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="km/h" android:checked="true"/>
+                        <RadioButton android:id="@+id/rbSpeedKts" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Knots" />
+                        <RadioButton android:id="@+id/rbSpeedMph" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="mph" />
+                        <RadioButton android:id="@+id/rbSpeedMach" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mach" />
+                    </RadioGroup>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="24dp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="16dp"/>
 
-                <!-- Climb Rate Units -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#FFFFFF"
-                    android:fontFamily="monospace"
-                    android:text="V-SPEED_MODE"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"/>
-                
-                <RadioGroup
-                    android:id="@+id/rgClimbUnits"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <RadioButton android:id="@+id/rbClimbMs" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="M/S"/>
-                    <RadioButton android:id="@+id/rbClimbKmh" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="KM/H" />
-                    <RadioButton android:id="@+id/rbClimbFpm" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FT/MIN" />
-                </RadioGroup>
+                    <!-- Initial Zoom -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:text="Initial Zoom"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+                    
+                    <RadioGroup
+                        android:id="@+id/rgInitialZoom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <RadioButton android:id="@+id/rbZoomFar" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Far (10x)" />
+                        <RadioButton android:id="@+id/rbZoomMedium" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Medium (14x)" />
+                        <RadioButton android:id="@+id/rbZoomClose" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Close (18x)" />
+                    </RadioGroup>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="24dp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="16dp"/>
 
-                <!-- Initial Zoom -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#FFFFFF"
-                    android:fontFamily="monospace"
-                    android:text="DEF_ZOOM"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"/>
-                
-                <RadioGroup
-                    android:id="@+id/rgInitialZoom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <RadioButton android:id="@+id/rbZoomFar" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="10X [FAR]" />
-                    <RadioButton android:id="@+id/rbZoomMedium" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="14X [MED]" />
-                    <RadioButton android:id="@+id/rbZoomClose" android:textColor="#0FFFFF" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="18X [CLOSE]" />
-                </RadioGroup>
+                    <!-- Debug Mode -->
+                    <Switch
+                        android:id="@+id/switchDebugMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Debug Mode (Raw Data &amp; Compass)"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp" />
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="24dp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="16dp"/>
 
-                <!-- Advanced -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="> DEV_TOOLS"
-                    android:textColor="#FF0000"
-                    android:textSize="14sp"
-                    android:fontFamily="monospace"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="16dp"/>
+                    <!-- Altitude Units -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:text="Altitude"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+                    
+                    <RadioGroup
+                        android:id="@+id/rgAltUnits"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <RadioButton android:id="@+id/rbAltM" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Meters" android:checked="true"/>
+                        <RadioButton android:id="@+id/rbAltFt" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Feet" />
+                        <RadioButton android:id="@+id/rbAltKm" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Kilometers (km)" />
+                        <RadioButton android:id="@+id/rbAltBk" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Burj Khalifa (bk)" />
+                    </RadioGroup>
 
-                <Switch
-                    android:id="@+id/switchDebugMode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="HUD_OVERLAY"
-                    android:fontFamily="monospace"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="16dp"/>
 
-            </LinearLayout>
+                    <!-- Climb Rate Units -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:text="Climb Rate"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+                    
+                    <RadioGroup
+                        android:id="@+id/rgClimbUnits"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <RadioButton android:id="@+id/rbClimbMs" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="m/s" android:checked="true"/>
+                        <RadioButton android:id="@+id/rbClimbKmh" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="km/h" />
+                        <RadioButton android:id="@+id/rbClimbFpm" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ft/min" />
+                    </RadioGroup>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
     </ScrollView>

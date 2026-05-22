@@ -4,9 +4,25 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class IntroActivity : AppCompatActivity() {
+
+    private var currentStep = 0
+
+    private val titles = arrayOf(
+        "Welcome to InTheAir ✈️",
+        "Real-Time Telemetry 📊",
+        "Offline Maps 🗺️"
+    )
+
+    private val descriptions = arrayOf(
+        "Your personal Google Maps for flying! Track your real-time position right from your window seat.",
+        "See your exact Speed, Altitude, Heading, and Climb Angle while in the air.",
+        "No internet at 30,000 feet? No problem. Download offline vector maps (.map files) from OpenAndroMaps and load them in the Route menu."
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +41,39 @@ class IntroActivity : AppCompatActivity() {
         val btnNext = findViewById<Button>(R.id.btnNext)
         
         btnNext.setOnClickListener {
-            finishIntro()
+            currentStep++
+            if (currentStep < 3) {
+                updateUI()
+            } else {
+                finishIntro()
+            }
+        }
+    }
+
+    private fun updateUI() {
+        val tvTitle = findViewById<TextView>(R.id.tvIntroTitle)
+        val tvDesc = findViewById<TextView>(R.id.tvIntroDesc)
+        val btnNext = findViewById<Button>(R.id.btnNext)
+
+        val dot1 = findViewById<ImageView>(R.id.dot1)
+        val dot2 = findViewById<ImageView>(R.id.dot2)
+        val dot3 = findViewById<ImageView>(R.id.dot3)
+
+        tvTitle.text = titles[currentStep]
+        tvDesc.text = descriptions[currentStep]
+
+        // Reset dots
+        dot1.setImageResource(R.drawable.ic_dot_inactive)
+        dot2.setImageResource(R.drawable.ic_dot_inactive)
+        dot3.setImageResource(R.drawable.ic_dot_inactive)
+
+        when (currentStep) {
+            0 -> dot1.setImageResource(R.drawable.ic_dot_active)
+            1 -> dot2.setImageResource(R.drawable.ic_dot_active)
+            2 -> {
+                dot3.setImageResource(R.drawable.ic_dot_active)
+                btnNext.text = "Get Started"
+            }
         }
     }
 

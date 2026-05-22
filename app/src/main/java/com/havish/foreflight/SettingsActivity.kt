@@ -1,7 +1,6 @@
 package com.havish.foreflight
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.RadioButton
@@ -27,15 +26,6 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putBoolean("offline_maps_only", isChecked).apply()
         }
 
-        // Action: Route Download
-        findViewById<Button>(R.id.btnDownloadRouteMap).setOnClickListener {
-            val intent = Intent().apply {
-                putExtra("action", "show_route_dialog")
-            }
-            setResult(RESULT_OK, intent)
-            finish()
-        }
-
         // Speed
         when (prefs.getString("unit_speed", "kmh")) {
             "kts" -> findViewById<RadioButton>(R.id.rbSpeedKts).isChecked = true
@@ -52,10 +42,6 @@ class SettingsActivity : AppCompatActivity() {
                 else -> "kts"
             }
             prefs.edit().putString("unit_speed", unit).apply()
-        }
-
-        findViewById<RadioButton>(R.id.rbSpeedMach).setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) prefs.edit().putString("unit_speed", "mach").apply()
         }
 
         // Initial Zoom
@@ -86,12 +72,14 @@ class SettingsActivity : AppCompatActivity() {
             "ft" -> findViewById<RadioButton>(R.id.rbAltFt).isChecked = true
             "m" -> findViewById<RadioButton>(R.id.rbAltM).isChecked = true
             "km" -> findViewById<RadioButton>(R.id.rbAltKm).isChecked = true
+            "bk" -> findViewById<RadioButton>(R.id.rbAltBk).isChecked = true
         }
 
         findViewById<RadioGroup>(R.id.rgAltUnits).setOnCheckedChangeListener { _, checkedId ->
             val unit = when (checkedId) {
                 R.id.rbAltM -> "m"
                 R.id.rbAltKm -> "km"
+                R.id.rbAltBk -> "bk"
                 else -> "ft"
             }
             prefs.edit().putString("unit_alt", unit).apply()
@@ -120,13 +108,13 @@ class SettingsActivity : AppCompatActivity() {
             if (tileCache != null && tileCache.exists()) {
                 tileCache.deleteRecursively()
                 tileCache.mkdirs()
-                Toast.makeText(this, "Offline Tile Cache Purged", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Offline Tile Cache Cleared", Toast.LENGTH_SHORT).show()
                 updateCacheSize()
             }
         }
 
         findViewById<Button>(R.id.btnViewOffline).setOnClickListener {
-            startActivity(Intent(this, OfflineMapsActivity::class.java))
+            startActivity(android.content.Intent(this, OfflineMapsActivity::class.java))
         }
     }
 
@@ -136,9 +124,9 @@ class SettingsActivity : AppCompatActivity() {
         if (tileCache != null && tileCache.exists()) {
             val sizeBytes = getFolderSize(tileCache)
             val sizeMb = sizeBytes / (1024.0 * 1024.0)
-            tvCacheSize.text = String.format("Cache: %.2f MB", sizeMb)
+            tvCacheSize.text = String.format("Current Cache Size: %.2f MB", sizeMb)
         } else {
-            tvCacheSize.text = "Cache: 0.00 MB"
+            tvCacheSize.text = "Current Cache Size: 0 MB"
         }
     }
 

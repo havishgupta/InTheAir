@@ -47,7 +47,7 @@ class OfflineMapsActivity : AppCompatActivity() {
             val tvMapName = itemView.findViewById<TextView>(R.id.tvMapName)
             val tvMapSize = itemView.findViewById<TextView>(R.id.tvMapSize)
             val btnActive = itemView.findViewById<Button>(R.id.btnActive)
-            val btnDelete = itemView.findViewById<Button>(R.id.btnDelete)
+            val btnDelete = itemView.findViewById<ImageView>(R.id.btnDelete)
 
             tvMapName.text = file.name
             
@@ -55,12 +55,12 @@ class OfflineMapsActivity : AppCompatActivity() {
             tvMapSize.text = String.format("%.2f MB", sizeMb)
 
             if (file.name == activeMap) {
-                btnActive.text = "[ ACTIVE ]"
-                btnActive.setTextColor(android.graphics.Color.parseColor("#0FFFFF"))
+                btnActive.text = "Active"
+                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4CAF50"))
                 btnActive.isEnabled = false
             } else {
-                btnActive.text = "[ SET ]"
-                btnActive.setTextColor(android.graphics.Color.parseColor("#FF00FF"))
+                btnActive.text = "Set Active"
+                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4DB6AC"))
                 btnActive.isEnabled = true
                 btnActive.setOnClickListener {
                     prefs.edit().putString("active_offline_map", file.name).apply()
