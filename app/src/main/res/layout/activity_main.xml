@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
+    android:background="#000000"
     tools:context=".MainActivity">
 
     <!-- The Map View -->
@@ -17,27 +17,65 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Top Telemetry Dashboard (Sleek modern design) -->
-    <androidx.cardview.widget.CardView
+    <!-- A Cyberpunk Overlay for the Map (slight vignette/vibration) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#1A0FFFFF"
+        android:clickable="false"
+        android:focusable="false"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Top Settings Button (Neon Style) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        android:src="@drawable/ic_settings_neon"
+        app:backgroundTint="#111111"
+        app:borderWidth="1dp"
+        app:elevation="12dp"
+        app:fabSize="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@null" />
+
+    <!-- Bottom Telemetry Dashboard (Cyberpunk Glassmorphism) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/telemetryDashboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="32dp"
-        app:cardBackgroundColor="#D91E1E24"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginBottom="24dp"
+        android:background="#DD000000"
+        android:padding="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent">
+        
+        <!-- Neon Border simulation -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:baselineAligned="false"
             android:orientation="horizontal"
-            android:padding="16dp"
-            android:weightSum="5">
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="8dp"
+            android:weightSum="5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <!-- SPEED -->
             <LinearLayout
@@ -46,23 +84,22 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.05"
-                    android:text="SPEED"
-                    android:textColor="#A0A0A0"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
+                    android:letterSpacing="0.2"
+                    android:text="VEL"
+                    android:textColor="#0FFFFF"
+                    android:fontFamily="monospace"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvSpeed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="--"
-                    android:textColor="#4DB6AC"
+                    android:text="000"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="monospace"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -74,23 +111,22 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.05"
+                    android:letterSpacing="0.2"
                     android:text="ALT"
-                    android:textColor="#A0A0A0"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
+                    android:textColor="#FF00FF"
+                    android:fontFamily="monospace"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvAlt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="--"
+                    android:text="000"
                     android:textColor="#FFFFFF"
+                    android:fontFamily="monospace"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -102,23 +138,22 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.05"
+                    android:letterSpacing="0.2"
                     android:text="HDG"
-                    android:textColor="#A0A0A0"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
+                    android:textColor="#0FFFFF"
+                    android:fontFamily="monospace"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvHeading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="--"
+                    android:text="000°"
                     android:textColor="#FFFFFF"
+                    android:fontFamily="monospace"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -130,150 +165,120 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.05"
-                    android:text="CLIMB"
-                    android:textColor="#A0A0A0"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
+                    android:letterSpacing="0.2"
+                    android:text="VRT"
+                    android:textColor="#FF00FF"
+                    android:fontFamily="monospace"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvClimb"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="--"
-                    android:textColor="#FFB74D"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="monospace"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- CLIMB ANGLE -->
+            <!-- PITCH -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.05"
-                    android:text="ANG"
-                    android:textColor="#A0A0A0"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
+                    android:letterSpacing="0.2"
+                    android:text="PCH"
+                    android:textColor="#0FFFFF"
+                    android:fontFamily="monospace"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/tvClimbAngle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="--"
+                    android:text="0°"
                     android:textColor="#FFFFFF"
+                    android:fontFamily="monospace"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
-
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Side Action Buttons (ForeFlight style vertical menu on the right) -->
-    <LinearLayout
+    <!-- Recenter Button (Bottom Right, Above Telemetry) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
-        android:orientation="vertical"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:src="@drawable/ic_recenter_neon"
+        app:backgroundTint="#111111"
+        app:borderWidth="1dp"
+        app:elevation="12dp"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/telemetryDashboard"
+        app:layout_constraintEnd_toEndOf="@+id/telemetryDashboard"
+        app:tint="@null" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabSettings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:src="@android:drawable/ic_menu_preferences"
-            app:backgroundTint="#D91E1E24"
-            app:elevation="4dp"
-            app:fabSize="normal"
-            app:tint="#FFFFFF" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabRoute"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:src="@android:drawable/ic_menu_mapmode"
-            app:backgroundTint="#4DB6AC"
-            app:elevation="4dp"
-            app:fabSize="normal"
-            app:tint="#121212" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_mylocation"
-            app:backgroundTint="#D91E1E24"
-            app:elevation="4dp"
-            app:fabSize="normal"
-            app:tint="#FFFFFF" />
-    </LinearLayout>
-
-    <!-- Debug Mode Panel -->
-    <androidx.cardview.widget.CardView
+    <!-- Debug Mode Panel (Sci-Fi Hud style) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cardDebugMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginTop="32dp"
         android:layout_marginStart="16dp"
         android:visibility="gone"
-        app:cardBackgroundColor="#D91E1E24"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#BB000000"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-
+        
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="16dp">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginEnd="16dp">
-                <TextView android:id="@+id/tvDebugLatLon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Lat: -- \nLon: --" />
-                <TextView android:id="@+id/tvDebugAcc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Acc: --" />
-                <TextView android:id="@+id/tvDebugRawSpeed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Speed (m/s): --" />
-                <TextView android:id="@+id/tvDebugRawAlt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Alt (m): --" />
-                <TextView android:id="@+id/tvDebugBearing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="10sp" android:text="Bearing: --" />
+                android:layout_marginEnd="12dp">
+                <TextView android:id="@+id/tvDebugLatLon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#0FFFFF" android:textSize="8sp" android:text="LAT: -- \nLON: --" android:fontFamily="monospace"/>
+                <TextView android:id="@+id/tvDebugAcc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FF00FF" android:textSize="8sp" android:text="ACC: --" android:fontFamily="monospace"/>
+                <TextView android:id="@+id/tvDebugRawSpeed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#0FFFFF" android:textSize="8sp" android:text="SPD: --" android:fontFamily="monospace"/>
+                <TextView android:id="@+id/tvDebugRawAlt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FF00FF" android:textSize="8sp" android:text="ALT: --" android:fontFamily="monospace"/>
+                <TextView android:id="@+id/tvDebugBearing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#0FFFFF" android:textSize="8sp" android:text="BRG: --" android:fontFamily="monospace"/>
             </LinearLayout>
 
             <RelativeLayout
-                android:layout_width="80dp"
-                android:layout_height="80dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="N 0°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S 180°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="W 270°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentStart="true" android:layout_centerVertical="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="E 90°" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentEnd="true" android:layout_centerVertical="true"/>
+                android:layout_width="60dp"
+                android:layout_height="60dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="N" android:textColor="#0FFFFF" android:textSize="8sp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true" android:fontFamily="monospace"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S" android:textColor="#FF00FF" android:textSize="8sp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true" android:fontFamily="monospace"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="W" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentStart="true" android:layout_centerVertical="true" android:fontFamily="monospace"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="E" android:textColor="#FFFFFF" android:textSize="8sp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:fontFamily="monospace"/>
                 
                 <ImageView
                     android:id="@+id/ivCompassArrow"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_centerInParent="true"
-                    android:src="@android:drawable/arrow_up_float"
-                    app:tint="#4DB6AC"/>
+                    android:src="@drawable/ic_recenter_neon"
+                    app:tint="#FF00FF"/>
             </RelativeLayout>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

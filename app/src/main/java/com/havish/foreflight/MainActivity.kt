@@ -173,6 +173,15 @@ class MainActivity : AppCompatActivity() {
         map.overlays.add(locationOverlay)
     }
 
+    private val settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val action = result.data?.getStringExtra("action")
+            if (action == "show_route_dialog") {
+                showRoutePlanDialog()
+            }
+        }
+    }
+
     private fun setupUI() {
         findViewById<FloatingActionButton>(R.id.fabLocation).setOnClickListener {
             if (locationOverlay.isMyLocationEnabled && locationOverlay.myLocation != null) {
@@ -184,11 +193,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<FloatingActionButton>(R.id.fabSettings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-
-        findViewById<FloatingActionButton>(R.id.fabRoute).setOnClickListener {
-            showRoutePlanDialog()
+            settingsLauncher.launch(Intent(this, SettingsActivity::class.java))
         }
 
         cardDebugMode = findViewById(R.id.cardDebugMode)
@@ -741,11 +746,11 @@ class MainActivity : AppCompatActivity() {
 
         // Update Debug Mode UI if active
         if (prefs.getBoolean("debug_mode", false)) {
-            tvDebugLatLon.text = String.format("Lat: %.6f\nLon: %.6f", location.latitude, location.longitude)
-            tvDebugAcc.text = if (location.hasAccuracy()) String.format("Acc: %.1fm", location.accuracy) else "Acc: --"
-            tvDebugRawSpeed.text = if (location.hasSpeed()) String.format("Speed (m/s): %.2f", location.speed) else "Speed (m/s): --"
-            tvDebugRawAlt.text = if (location.hasAltitude()) String.format("Alt (m): %.2f", location.altitude) else "Alt (m): --"
-            tvDebugBearing.text = String.format("Bearing: %.1f°", currentBearing)
+            tvDebugLatLon.text = String.format("LAT: %.6f\nLON: %.6f", location.latitude, location.longitude)
+            tvDebugAcc.text = if (location.hasAccuracy()) String.format("ACC: %.1fm", location.accuracy) else "ACC: --"
+            tvDebugRawSpeed.text = if (location.hasSpeed()) String.format("SPD: %.2f", location.speed) else "SPD: --"
+            tvDebugRawAlt.text = if (location.hasAltitude()) String.format("ALT: %.2f", location.altitude) else "ALT: --"
+            tvDebugBearing.text = String.format("BRG: %.1f°", currentBearing)
             ivCompassArrow.rotation = currentBearing
         }
 

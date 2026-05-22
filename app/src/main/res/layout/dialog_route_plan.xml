@@ -1,85 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#121212">
+    android:background="#000000">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="32dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Offline Maps"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
+            android:text="> DB_ACCESS"
+            android:textColor="#0FFFFF"
+            android:fontFamily="monospace"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="To use maps offline while flying, download a '.map' vector file from OpenAndroMaps to your device, then load it here."
-            android:textColor="#A0A0A0"
-            android:textSize="14sp"
-            android:lineSpacingExtra="4dp"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Website: https://www.openandromaps.org/en/downloads"
-            android:autoLink="web"
-            android:textColorLink="#4DB6AC"
-            android:textSize="16sp"
-            android:textStyle="bold"
+            android:text="// SECURE VECTOR DOWNLINK REQUIRED\n// ACQUIRE .MAP EXTERNALLY"
+            android:textColor="#FF00FF"
+            android:fontFamily="monospace"
+            android:textSize="12sp"
+            android:lineSpacingExtra="6dp"
             android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SRC: https://www.openandromaps.org/en/downloads"
+            android:autoLink="web"
+            android:textColorLink="#0FFFFF"
+            android:fontFamily="monospace"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp"/>
 
         <Button
             android:id="@+id/btnLoadMapFile"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Load Offline .map File"
-            android:textAllCaps="false"
+            android:layout_height="64dp"
+            android:text="[ INJECT_FILE ]"
+            android:fontFamily="monospace"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#121212"
-            android:backgroundTint="#4DB6AC"/>
+            android:textColor="#000000"
+            android:backgroundTint="#0FFFFF"
+            android:layout_marginBottom="24dp"/>
 
-        <!-- Kept for compatibility but hidden as requested -->
-        <AutoCompleteTextView
-            android:id="@+id/etFrom"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
-        <AutoCompleteTextView
-            android:id="@+id/etTo"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/btnDownload"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/btnDownloadManual"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/btnDownloadIndia"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
+        <!-- Hidden legacy fields -->
+        <AutoCompleteTextView android:id="@+id/etFrom" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+        <AutoCompleteTextView android:id="@+id/etTo" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+        <Button android:id="@+id/btnDownload" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+        <Button android:id="@+id/btnDownloadManual" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+        <Button android:id="@+id/btnDownloadIndia" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

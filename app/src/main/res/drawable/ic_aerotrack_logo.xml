@@ -1,0 +1,36 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Cyberpunk Hexagon Core -->
+    <path
+        android:pathData="M100,10 L180,50 L180,150 L100,190 L20,150 L20,50 Z"
+        android:strokeColor="#0FFFFF"
+        android:strokeWidth="4"
+        android:fillColor="#1A0FFFFF"/>
+    
+    <!-- Inner complex geometry -->
+    <path
+        android:pathData="M100,30 L160,65 L160,135 L100,170 L40,135 L40,65 Z"
+        android:strokeColor="#FF00FF"
+        android:strokeWidth="2"/>
+
+    <!-- Sci-fi Eye / Tracking Lens -->
+    <path
+        android:pathData="M50,100 Q100,50 150,100 Q100,150 50,100 Z"
+        android:strokeColor="#0FFFFF"
+        android:strokeWidth="3"/>
+    <circle
+        android:cx="100"
+        android:cy="100"
+        android:radius="15"
+        android:fillColor="#FF00FF"/>
+    
+    <!-- Tech accents -->
+    <path
+        android:pathData="M100,5 L100,25 M100,175 L100,195 M5,100 L25,100 M175,100 L195,100"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3"/>
+</vector>

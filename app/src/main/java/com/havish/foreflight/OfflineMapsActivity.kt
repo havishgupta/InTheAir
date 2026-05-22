@@ -55,12 +55,12 @@ class OfflineMapsActivity : AppCompatActivity() {
             tvMapSize.text = String.format("%.2f MB", sizeMb)
 
             if (file.name == activeMap) {
-                btnActive.text = "Active"
-                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4CAF50"))
+                btnActive.text = "[ ACTIVE ]"
+                btnActive.setTextColor(android.graphics.Color.parseColor("#0FFFFF"))
                 btnActive.isEnabled = false
             } else {
-                btnActive.text = "Set Active"
-                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4DB6AC"))
+                btnActive.text = "[ SET ]"
+                btnActive.setTextColor(android.graphics.Color.parseColor("#FF00FF"))
                 btnActive.isEnabled = true
                 btnActive.setOnClickListener {
                     prefs.edit().putString("active_offline_map", file.name).apply()
