@@ -47,7 +47,7 @@ class OfflineMapsActivity : AppCompatActivity() {
             val tvMapName = itemView.findViewById<TextView>(R.id.tvMapName)
             val tvMapSize = itemView.findViewById<TextView>(R.id.tvMapSize)
             val btnActive = itemView.findViewById<Button>(R.id.btnActive)
-            val btnDelete = itemView.findViewById<ImageView>(R.id.btnDelete)
+            val btnDelete = itemView.findViewById<Button>(R.id.btnDelete)
 
             tvMapName.text = file.name
             

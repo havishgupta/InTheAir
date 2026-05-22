@@ -22,10 +22,8 @@
         android:pathData="M50,100 Q100,50 150,100 Q100,150 50,100 Z"
         android:strokeColor="#0FFFFF"
         android:strokeWidth="3"/>
-    <circle
-        android:cx="100"
-        android:cy="100"
-        android:radius="15"
+    <path
+        android:pathData="M85,100 L100,85 L115,100 L100,115 Z"
         android:fillColor="#FF00FF"/>
     
     <!-- Tech accents -->

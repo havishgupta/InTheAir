@@ -8,10 +8,8 @@
         android:strokeColor="#FF00FF"
         android:strokeWidth="2"
         android:pathData="M12,4 L12,8 M12,20 L12,16 M4,12 L8,12 M20,12 L16,12"/>
-    <circle
-        android:cx="12"
-        android:cy="12"
-        android:radius="3"
+    <path
+        android:pathData="M9,12 L12,9 L15,12 L12,15 Z"
         android:fillColor="#0FFFFF"/>
     <path
         android:strokeColor="#0FFFFF"
