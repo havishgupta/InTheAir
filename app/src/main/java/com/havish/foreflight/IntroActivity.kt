@@ -64,14 +64,24 @@ class IntroActivity : AppCompatActivity() {
 
         // Reset dots
         dot1.setImageResource(R.drawable.ic_dot_inactive)
+        dot1.setColorFilter(getColor(R.color.cloud_white))
         dot2.setImageResource(R.drawable.ic_dot_inactive)
+        dot2.setColorFilter(getColor(R.color.cloud_white))
         dot3.setImageResource(R.drawable.ic_dot_inactive)
+        dot3.setColorFilter(getColor(R.color.cloud_white))
 
         when (currentStep) {
-            0 -> dot1.setImageResource(R.drawable.ic_dot_active)
-            1 -> dot2.setImageResource(R.drawable.ic_dot_active)
+            0 -> {
+                dot1.setImageResource(R.drawable.ic_dot_active)
+                dot1.setColorFilter(getColor(R.color.sun_yellow))
+            }
+            1 -> {
+                dot2.setImageResource(R.drawable.ic_dot_active)
+                dot2.setColorFilter(getColor(R.color.sun_yellow))
+            }
             2 -> {
                 dot3.setImageResource(R.drawable.ic_dot_active)
+                dot3.setColorFilter(getColor(R.color.sun_yellow))
                 btnNext.text = "Get Started"
             }
         }

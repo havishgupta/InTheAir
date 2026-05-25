@@ -3,16 +3,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0A"> <!-- Premium dark background -->
+    android:background="@color/sky_blue">
 
-    <!-- Glassmorphism card effect for the intro -->
+    <!-- Background clouds -->
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="20dp"
+        android:src="@drawable/ic_cloud"
+        android:tint="#FFFFFF"
+        android:alpha="0.8"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="120dp"
+        android:layout_marginEnd="-40dp"
+        android:src="@drawable/ic_cloud"
+        android:tint="#FFFFFF"
+        android:alpha="0.6"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Glassmorphism/soft card effect for the intro -->
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
-        app:cardBackgroundColor="#1A1A1E"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/cloud_white"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="12dp"
         app:layout_constraintBottom_toTopOf="@+id/btnNext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,7 +54,7 @@
                 android:layout_height="120dp"
                 android:layout_marginBottom="24dp"
                 android:src="@drawable/ic_plane"
-                app:tint="#00E5FF" /> <!-- Vibrant cyan accent -->
+                app:tint="@color/deep_sky_blue" />
 
             <TextView
                 android:id="@+id/tvIntroTitle"
@@ -40,8 +63,8 @@
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
                 android:text="Welcome to InTheAir ✈️"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
+                android:textColor="@color/text_blue_black"
+                android:textSize="26sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -51,8 +74,8 @@
                 android:gravity="center"
                 android:lineSpacingExtra="4dp"
                 android:text="Your personal Google Maps for flying! Track your real-time position, speed, altitude, and climb angle right from your window seat."
-                android:textColor="#BBBBBB"
-                android:textSize="16sp" />
+                android:textColor="@color/text_blue_black"
+                android:textSize="18sp" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -69,36 +92,40 @@
 
         <ImageView
             android:id="@+id/dot1"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:layout_marginEnd="8dp"
-            android:src="@drawable/ic_dot_active" />
+            android:src="@drawable/ic_dot_active"
+            app:tint="@color/sun_yellow"/>
 
         <ImageView
             android:id="@+id/dot2"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:layout_marginEnd="8dp"
-            android:src="@drawable/ic_dot_inactive" />
+            android:src="@drawable/ic_dot_inactive"
+            app:tint="@color/cloud_white"/>
 
         <ImageView
             android:id="@+id/dot3"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
-            android:src="@drawable/ic_dot_inactive" />
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_dot_inactive"
+            app:tint="@color/cloud_white"/>
     </LinearLayout>
 
     <Button
         android:id="@+id/btnNext"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="64dp"
         android:layout_margin="32dp"
-        android:backgroundTint="#00E5FF"
+        android:backgroundTint="@color/sun_yellow"
         android:text="Next"
         android:textAllCaps="false"
-        android:textColor="#0A0A0A"
-        android:textSize="18sp"
+        android:textColor="@color/text_blue_black"
+        android:textSize="20sp"
         android:textStyle="bold"
+        app:cornerRadius="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

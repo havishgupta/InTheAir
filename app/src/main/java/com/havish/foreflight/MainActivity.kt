@@ -91,14 +91,7 @@ class MainActivity : AppCompatActivity() {
     private var lastLogTime = 0L
     private val routeLines = mutableListOf<org.osmdroid.views.overlay.Polyline>()
 
-    // Launcher for selecting a .map file
-    private val mapFilePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            importAndLoadMapFile(uri)
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private fun checkForSavedMapFile() {
         super.onCreate(savedInstanceState)
         
         // Initialize Mapsforge graphics factory before anything else
@@ -307,7 +300,6 @@ class MainActivity : AppCompatActivity() {
         val btnDownload = view.findViewById<Button>(R.id.btnDownload)
         val btnDownloadManual = view.findViewById<Button>(R.id.btnDownloadManual)
         val btnDownloadIndia = view.findViewById<Button>(R.id.btnDownloadIndia)
-        val btnLoadMapFile = view.findViewById<Button>(R.id.btnLoadMapFile)
 
         setupAutoComplete(etFrom)
         setupAutoComplete(etTo)
@@ -329,11 +321,6 @@ class MainActivity : AppCompatActivity() {
         btnDownloadIndia.setOnClickListener {
             dialog.dismiss()
             downloadIndiaMap()
-        }
-
-        btnLoadMapFile.setOnClickListener {
-            dialog.dismiss()
-            mapFilePicker.launch(arrayOf("*/*"))
         }
 
         btnDownload.setOnClickListener {
@@ -937,6 +924,25 @@ class MainActivity : AppCompatActivity() {
         locationOverlay.enableMyLocation()
         startLocationUpdates()
         checkForSavedMapFile()
+        checkIntentForRoute(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent?.let { checkIntentForRoute(it) }
+    }
+
+    private fun checkIntentForRoute(intent: Intent) {
+        val routeId = intent.getLongExtra("view_route_id", -1L)
+        if (routeId != -1L) {
+            val route = routeManager.getSavedRoutes().find { it.id == routeId }
+            if (route != null) {
+                drawFullRoute(route)
+            }
+            // Clear the extra so it doesn't re-trigger on orientation change
+            intent.removeExtra("view_route_id")
+        }
     }
 
     override fun onPause() {

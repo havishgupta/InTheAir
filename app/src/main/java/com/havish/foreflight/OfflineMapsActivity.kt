@@ -2,6 +2,7 @@ package com.havish.foreflight
 
 import android.content.Context
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -9,13 +10,26 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
 
 class OfflineMapsActivity : AppCompatActivity() {
 
     private lateinit var mapsListContainer: LinearLayout
     private lateinit var tvEmpty: TextView
+    private val scope = CoroutineScope(Dispatchers.Main)
+
+    private val mapFilePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            importAndLoadMapFile(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +38,75 @@ class OfflineMapsActivity : AppCompatActivity() {
         mapsListContainer = findViewById(R.id.mapsListContainer)
         tvEmpty = findViewById(R.id.tvEmpty)
 
+        findViewById<Button>(R.id.btnLoadMapFile).setOnClickListener {
+            mapFilePicker.launch(arrayOf("*/*"))
+        }
+
         loadOfflineMaps()
+    }
+
+    private fun getFileName(uri: android.net.Uri): String {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = contentResolver.query(uri, null, null, null, null)
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (index >= 0) {
+                        result = cursor.getString(index)
+                    }
+                }
+            } finally {
+                cursor?.close()
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/') ?: -1
+            if (cut != -1) {
+                result = result?.substring(cut + 1)
+            }
+        }
+        return result ?: "offline_map_${System.currentTimeMillis()}.map"
+    }
+
+    private fun importAndLoadMapFile(uri: android.net.Uri) {
+        val progressDialog = android.app.AlertDialog.Builder(this)
+            .setTitle("Importing Map")
+            .setMessage("Please wait while the map file is copied to the app's secure storage...")
+            .setCancelable(false)
+            .create()
+        progressDialog.show()
+
+        val fileName = getFileName(uri)
+
+        scope.launch {
+            try {
+                val mapsDir = File(filesDir, "mapsforge")
+                mapsDir.mkdirs()
+                
+                val destFile = File(mapsDir, fileName)
+
+                withContext(Dispatchers.IO) {
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        FileOutputStream(destFile).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+
+                val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putString("active_offline_map", fileName).apply()
+
+                progressDialog.dismiss()
+                Toast.makeText(this@OfflineMapsActivity, "Map imported successfully!", Toast.LENGTH_SHORT).show()
+                loadOfflineMaps()
+                
+            } catch (e: Throwable) {
+                progressDialog.dismiss()
+                Toast.makeText(this@OfflineMapsActivity, "Failed to import map: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun loadOfflineMaps() {
@@ -60,7 +142,7 @@ class OfflineMapsActivity : AppCompatActivity() {
                 btnActive.isEnabled = false
             } else {
                 btnActive.text = "Set Active"
-                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4DB6AC"))
+                btnActive.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#87CEEB")) // Sky Blue
                 btnActive.isEnabled = true
                 btnActive.setOnClickListener {
                     prefs.edit().putString("active_offline_map", file.name).apply()

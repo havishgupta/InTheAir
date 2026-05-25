@@ -1,8 +1,11 @@
 package com.havish.foreflight
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -13,9 +16,13 @@ import java.io.File
 
 class SettingsActivity : AppCompatActivity() {
 
+    private lateinit var routeManager: RouteManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        routeManager = RouteManager(this)
 
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
 
@@ -134,8 +141,103 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnViewOffline).setOnClickListener {
-            startActivity(android.content.Intent(this, OfflineMapsActivity::class.java))
+            startActivity(Intent(this, OfflineMapsActivity::class.java))
         }
+
+        // Routes Section Setup
+        loadRecentRoutes()
+
+        findViewById<Button>(R.id.btnViewAllRoutes).setOnClickListener {
+            showRoutesListDialog()
+        }
+    }
+
+    private fun loadRecentRoutes() {
+        val llRecentRoutes = findViewById<LinearLayout>(R.id.llRecentRoutes)
+        llRecentRoutes.removeAllViews()
+
+        val allRoutes = routeManager.getSavedRoutes()
+        if (allRoutes.isEmpty()) {
+            val emptyTv = TextView(this)
+            emptyTv.text = "No recent routes found."
+            emptyTv.setTextColor(android.graphics.Color.parseColor("#555555"))
+            llRecentRoutes.addView(emptyTv)
+            return
+        }
+
+        val recent = allRoutes.take(3)
+        for (route in recent) {
+            val routeTv = TextView(this)
+            routeTv.text = "✈️ ${route.name}"
+            routeTv.textSize = 16f
+            routeTv.setTextColor(android.graphics.Color.parseColor("#191970"))
+            routeTv.setPadding(0, 8, 0, 8)
+            routeTv.setOnClickListener {
+                showRouteOptionsDialog(route)
+            }
+            llRecentRoutes.addView(routeTv)
+        }
+    }
+
+    private fun showRoutesListDialog() {
+        val routes = routeManager.getSavedRoutes()
+        if (routes.isEmpty()) {
+            Toast.makeText(this, "No saved routes", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val names = routes.map { it.name }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Saved Routes")
+            .setItems(names) { _, which ->
+                val selected = routes[which]
+                showRouteOptionsDialog(selected)
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showRouteOptionsDialog(route: RouteData) {
+        val options = arrayOf("View on Map", "Rename", "Delete")
+        AlertDialog.Builder(this)
+            .setTitle(route.name)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.putExtra("view_route_id", route.id)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        startActivity(intent)
+                        finish()
+                    }
+                    1 -> showRenameRouteDialog(route)
+                    2 -> {
+                        routeManager.deleteRoute(route.id)
+                        loadRecentRoutes()
+                        Toast.makeText(this, "Deleted ${route.name}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showRenameRouteDialog(route: RouteData) {
+        val input = android.widget.EditText(this)
+        input.setText(route.name)
+        AlertDialog.Builder(this)
+            .setTitle("Rename Route")
+            .setView(input)
+            .setPositiveButton("Save") { _, _ ->
+                val newName = input.text.toString()
+                if (newName.isNotBlank()) {
+                    routeManager.renameRoute(route.id, newName)
+                    loadRecentRoutes()
+                    Toast.makeText(this, "Renamed to $newName", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun updateCacheSize() {
