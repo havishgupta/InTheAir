@@ -934,8 +934,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkIntentForRoute(intent: Intent) {
-        val routeId = intent.getLongExtra("view_route_id", -1L)
-        if (routeId != -1L) {
+        val routeId = intent.getStringExtra("view_route_id")
+        if (routeId != null) {
             val route = routeManager.getSavedRoutes().find { it.id == routeId }
             if (route != null) {
                 drawFullRoute(route)
