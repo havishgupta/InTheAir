@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
     private var lastLogTime = 0L
     private val routeLines = mutableListOf<org.osmdroid.views.overlay.Polyline>()
 
-    private fun checkForSavedMapFile() {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         // Initialize Mapsforge graphics factory before anything else
@@ -180,10 +180,6 @@ class MainActivity : AppCompatActivity() {
             toggleRouteRecording(fabRecord)
         }
 
-        findViewById<FloatingActionButton>(R.id.fabRoutesList).setOnClickListener {
-            showRoutesListDialog()
-        }
-
         findViewById<FloatingActionButton>(R.id.fabLocation).setOnClickListener {
             if (locationOverlay.isMyLocationEnabled && locationOverlay.myLocation != null) {
                 map.controller.animateTo(locationOverlay.myLocation)
@@ -195,10 +191,6 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<FloatingActionButton>(R.id.fabSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
-        }
-
-        findViewById<FloatingActionButton>(R.id.fabRoute).setOnClickListener {
-            showRoutePlanDialog()
         }
 
         cardDebugMode = findViewById(R.id.cardDebugMode)
