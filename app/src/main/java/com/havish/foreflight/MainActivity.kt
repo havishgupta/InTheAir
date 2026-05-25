@@ -792,11 +792,48 @@ class MainActivity : AppCompatActivity() {
             fab.setImageResource(android.R.drawable.ic_media_pause)
             Toast.makeText(this, "Started Recording Route", Toast.LENGTH_SHORT).show()
         } else {
-            isRecordingRoute = false
-            currentRoute?.let { routeManager.saveRoute(it) }
-            fab.setImageResource(android.R.drawable.ic_media_play)
-            Toast.makeText(this, "Saved Route: ${currentRoute?.name}", Toast.LENGTH_SHORT).show()
-            currentRoute = null
+            val routeToSave = currentRoute
+            if (routeToSave == null) {
+                isRecordingRoute = false
+                fab.setImageResource(android.R.drawable.ic_media_play)
+                return
+            }
+
+            // Pause recording visually but keep it in state until confirmed
+            val input = android.widget.EditText(this)
+            input.setText(routeToSave.name)
+            
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Stop Recording")
+                .setMessage("Enter a name for this route:")
+                .setView(input)
+                .setPositiveButton("Save") { _, _ ->
+                    val newName = input.text.toString()
+                    if (newName.isNotBlank()) {
+                        routeToSave.name = newName
+                    }
+                    routeManager.saveRoute(routeToSave)
+                    
+                    isRecordingRoute = false
+                    currentRoute = null
+                    fab.setImageResource(android.R.drawable.ic_media_play)
+                    Toast.makeText(this, "Saved Route: ${routeToSave.name}", Toast.LENGTH_SHORT).show()
+                }
+                .setNeutralButton("Discard") { _, _ ->
+                    isRecordingRoute = false
+                    currentRoute = null
+                    clearRouteDrawing()
+                    fab.setImageResource(android.R.drawable.ic_media_play)
+                    Toast.makeText(this, "Route Discarded", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel") { _, _ ->
+                    // Resume recording, do nothing
+                    Toast.makeText(this, "Recording resumed", Toast.LENGTH_SHORT).show()
+                }
+                .setCancelable(false)
+                .create()
+            
+            dialog.show()
         }
     }
 

@@ -7,23 +7,25 @@
 
     <!-- Background clouds -->
     <ImageView
+        android:id="@+id/cloud1"
         android:layout_width="150dp"
         android:layout_height="100dp"
         android:layout_marginTop="40dp"
         android:layout_marginStart="20dp"
         android:src="@drawable/ic_cloud"
-        android:tint="#FFFFFF"
+        app:tint="#FFFFFF"
         android:alpha="0.8"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
     <ImageView
+        android:id="@+id/cloud2"
         android:layout_width="200dp"
         android:layout_height="130dp"
         android:layout_marginTop="120dp"
         android:layout_marginEnd="-40dp"
         android:src="@drawable/ic_cloud"
-        android:tint="#FFFFFF"
+        app:tint="#FFFFFF"
         android:alpha="0.6"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -35,7 +37,7 @@
         android:layout_margin="32dp"
         app:cardBackgroundColor="@color/cloud_white"
         app:cardCornerRadius="30dp"
-        app:cardElevation="12dp"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toTopOf="@+id/btnNext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,8 +64,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
-                android:text="Welcome to InTheAir ✈️"
-                android:textColor="@color/text_blue_black"
+                android:text="Welcome to InTheAir"
+                android:textColor="@color/text_dark_grey"
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
@@ -73,8 +75,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:lineSpacingExtra="4dp"
-                android:text="Your personal Google Maps for flying! Track your real-time position, speed, altitude, and climb angle right from your window seat."
-                android:textColor="@color/text_blue_black"
+                android:text="Your personal map for flying! Track your real-time position right from your window seat."
+                android:textColor="@color/text_dark_grey"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -96,7 +98,7 @@
             android:layout_height="16dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/ic_dot_active"
-            app:tint="@color/sun_yellow"/>
+            app:tint="@color/accent_yellow"/>
 
         <ImageView
             android:id="@+id/dot2"
@@ -119,10 +121,10 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_margin="32dp"
-        android:backgroundTint="@color/sun_yellow"
+        android:backgroundTint="@color/deep_sky_blue"
         android:text="Next"
         android:textAllCaps="false"
-        android:textColor="@color/text_blue_black"
+        android:textColor="@color/cloud_white"
         android:textSize="20sp"
         android:textStyle="bold"
         app:cornerRadius="32dp"

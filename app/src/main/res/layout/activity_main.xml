@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/sky_blue"
+    android:background="@android:color/transparent"
     tools:context=".MainActivity">
 
     <!-- The Map View -->
@@ -17,16 +17,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Top Telemetry Dashboard (Childish design) -->
+    <!-- Top Telemetry Dashboard (Translucent) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/telemetryDashboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="32dp"
-        app:cardBackgroundColor="@color/cloud_white"
+        app:cardBackgroundColor="@color/translucent_white"
         app:cardCornerRadius="24dp"
-        app:cardElevation="12dp"
+        app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -51,7 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="SPEED"
-                    android:textColor="@color/text_blue_black"
+                    android:textColor="@color/text_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ALT"
-                    android:textColor="@color/text_blue_black"
+                    android:textColor="@color/text_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -105,7 +105,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="HDG"
-                    android:textColor="@color/text_blue_black"
+                    android:textColor="@color/text_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -132,7 +132,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CLIMB"
-                    android:textColor="@color/text_blue_black"
+                    android:textColor="@color/text_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -142,7 +142,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="--"
-                    android:textColor="@color/sun_yellow"
+                    android:textColor="@color/deep_sky_blue"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -159,7 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ANG"
-                    android:textColor="@color/text_blue_black"
+                    android:textColor="@color/text_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -193,8 +193,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:src="@android:drawable/ic_media_play"
-            app:backgroundTint="@color/button_white"
-            app:elevation="8dp"
+            app:backgroundTint="@color/translucent_white"
+            app:elevation="0dp"
             app:fabSize="normal"
             app:tint="@color/deep_sky_blue" />
 
@@ -204,18 +204,18 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:src="@drawable/ic_gear"
-            app:backgroundTint="@color/button_white"
-            app:elevation="8dp"
+            app:backgroundTint="@color/translucent_white"
+            app:elevation="0dp"
             app:fabSize="normal"
-            app:tint="@color/sun_yellow" />
+            app:tint="@color/deep_sky_blue" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_mylocation"
-            app:backgroundTint="@color/button_white"
-            app:elevation="8dp"
+            app:backgroundTint="@color/translucent_white"
+            app:elevation="0dp"
             app:fabSize="normal"
             app:tint="@color/deep_sky_blue" />
     </LinearLayout>
@@ -228,9 +228,9 @@
         android:layout_marginBottom="32dp"
         android:layout_marginStart="16dp"
         android:visibility="gone"
-        app:cardBackgroundColor="@color/cloud_white"
+        app:cardBackgroundColor="@color/translucent_white"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -245,20 +245,20 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginEnd="16dp">
-                <TextView android:id="@+id/tvDebugLatLon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_blue_black" android:textSize="10sp" android:text="Lat: -- \nLon: --" />
-                <TextView android:id="@+id/tvDebugAcc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_blue_black" android:textSize="10sp" android:text="Acc: --" />
-                <TextView android:id="@+id/tvDebugRawSpeed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_blue_black" android:textSize="10sp" android:text="Speed (m/s): --" />
-                <TextView android:id="@+id/tvDebugRawAlt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_blue_black" android:textSize="10sp" android:text="Alt (m): --" />
-                <TextView android:id="@+id/tvDebugBearing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_blue_black" android:textSize="10sp" android:text="Bearing: --" />
+                <TextView android:id="@+id/tvDebugLatLon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_dark_grey" android:textSize="10sp" android:text="Lat: -- \nLon: --" />
+                <TextView android:id="@+id/tvDebugAcc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_dark_grey" android:textSize="10sp" android:text="Acc: --" />
+                <TextView android:id="@+id/tvDebugRawSpeed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_dark_grey" android:textSize="10sp" android:text="Speed (m/s): --" />
+                <TextView android:id="@+id/tvDebugRawAlt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_dark_grey" android:textSize="10sp" android:text="Alt (m): --" />
+                <TextView android:id="@+id/tvDebugBearing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_dark_grey" android:textSize="10sp" android:text="Bearing: --" />
             </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="80dp"
                 android:layout_height="80dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="N 0°" android:textColor="@color/text_blue_black" android:textSize="8sp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S 180°" android:textColor="@color/text_blue_black" android:textSize="8sp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="W 270°" android:textColor="@color/text_blue_black" android:textSize="8sp" android:layout_alignParentStart="true" android:layout_centerVertical="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="E 90°" android:textColor="@color/text_blue_black" android:textSize="8sp" android:layout_alignParentEnd="true" android:layout_centerVertical="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="N 0°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S 180°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="W 270°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentStart="true" android:layout_centerVertical="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="E 90°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentEnd="true" android:layout_centerVertical="true"/>
                 
                 <ImageView
                     android:id="@+id/ivCompassArrow"
