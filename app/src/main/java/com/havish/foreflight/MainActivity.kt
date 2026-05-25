@@ -85,6 +85,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
+    private lateinit var routeManager: RouteManager
+    private var isRecordingRoute = false
+    private var currentRoute: RouteData? = null
+    private var lastLogTime = 0L
+    private val routeLines = mutableListOf<org.osmdroid.views.overlay.Polyline>()
+
     // Launcher for selecting a .map file
     private val mapFilePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -750,6 +756,168 @@ class MainActivity : AppCompatActivity() {
         }
 
         lastLocation = location
+
+        if (isRecordingRoute && currentRoute != null) {
+            val intervalSecs = prefs.getInt("logging_interval", 1)
+            val now = System.currentTimeMillis()
+            if (now - lastLogTime >= intervalSecs * 1000L) {
+                lastLogTime = now
+                val pt = RoutePoint(
+                    lat = location.latitude,
+                    lon = location.longitude,
+                    alt = if (location.hasAltitude()) location.altitude else 0.0,
+                    speed = if (location.hasSpeed()) location.speed.toDouble() else 0.0,
+                    timestamp = now
+                )
+                
+                val prevPt = currentRoute!!.points.lastOrNull()
+                currentRoute!!.points.add(pt)
+                currentRoute!!.endTime = now
+                
+                // Draw new segment
+                if (prevPt != null) {
+                    drawRouteSegment(prevPt, pt)
+                }
+            }
+        }
+    }
+
+    private fun toggleRouteRecording(fab: FloatingActionButton) {
+        if (!isRecordingRoute) {
+            isRecordingRoute = true
+            currentRoute = routeManager.startNewRoute()
+            lastLogTime = System.currentTimeMillis()
+            clearRouteDrawing()
+            
+            // Add initial point if location available
+            lastLocation?.let { loc ->
+                currentRoute?.points?.add(RoutePoint(
+                    lat = loc.latitude, lon = loc.longitude,
+                    alt = if (loc.hasAltitude()) loc.altitude else 0.0,
+                    speed = if (loc.hasSpeed()) loc.speed.toDouble() else 0.0,
+                    timestamp = lastLogTime
+                ))
+            }
+            
+            fab.setImageResource(android.R.drawable.ic_media_pause)
+            Toast.makeText(this, "Started Recording Route", Toast.LENGTH_SHORT).show()
+        } else {
+            isRecordingRoute = false
+            currentRoute?.let { routeManager.saveRoute(it) }
+            fab.setImageResource(android.R.drawable.ic_media_play)
+            Toast.makeText(this, "Saved Route: ${currentRoute?.name}", Toast.LENGTH_SHORT).show()
+            currentRoute = null
+        }
+    }
+
+    private fun showRoutesListDialog() {
+        val routes = routeManager.getSavedRoutes()
+        if (routes.isEmpty()) {
+            Toast.makeText(this, "No saved routes", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val names = routes.map { it.name }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Saved Routes")
+            .setItems(names) { _, which ->
+                val selected = routes[which]
+                showRouteOptionsDialog(selected)
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun showRouteOptionsDialog(route: RouteData) {
+        val options = arrayOf("View on Map", "Rename", "Delete")
+        AlertDialog.Builder(this)
+            .setTitle(route.name)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> drawFullRoute(route)
+                    1 -> showRenameRouteDialog(route)
+                    2 -> {
+                        routeManager.deleteRoute(route.id)
+                        clearRouteDrawing()
+                        Toast.makeText(this, "Deleted ${route.name}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showRenameRouteDialog(route: RouteData) {
+        val input = android.widget.EditText(this)
+        input.setText(route.name)
+        AlertDialog.Builder(this)
+            .setTitle("Rename Route")
+            .setView(input)
+            .setPositiveButton("Save") { _, _ ->
+                val newName = input.text.toString()
+                if (newName.isNotBlank()) {
+                    routeManager.renameRoute(route.id, newName)
+                    Toast.makeText(this, "Renamed to $newName", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun clearRouteDrawing() {
+        for (line in routeLines) {
+            map.overlays.remove(line)
+        }
+        routeLines.clear()
+        map.invalidate()
+    }
+
+    private fun drawFullRoute(route: RouteData) {
+        clearRouteDrawing()
+        if (route.points.isEmpty()) return
+        
+        for (i in 1 until route.points.size) {
+            drawRouteSegment(route.points[i - 1], route.points[i])
+        }
+        
+        // Zoom to start
+        val startPt = route.points.first()
+        map.controller.animateTo(GeoPoint(startPt.lat, startPt.lon))
+        map.controller.setZoom(12.0)
+        Toast.makeText(this, "Viewing: ${route.name}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun drawRouteSegment(p1: RoutePoint, p2: RoutePoint) {
+        val line = org.osmdroid.views.overlay.Polyline()
+        line.addPoint(GeoPoint(p1.lat, p1.lon))
+        line.addPoint(GeoPoint(p2.lat, p2.lon))
+        
+        // Map altitude to color
+        // Assuming 0m to 12000m (approx 40,000 ft) scale
+        val maxAlt = 12000.0
+        val ratioAlt = (p2.alt / maxAlt).coerceIn(0.0, 1.0)
+        
+        // Color gradient from blue (low) -> green -> yellow -> red (high)
+        val color = when {
+            ratioAlt < 0.25 -> android.graphics.Color.rgb(0, (ratioAlt * 4 * 255).toInt(), 255)
+            ratioAlt < 0.5 -> android.graphics.Color.rgb(0, 255, (255 - (ratioAlt - 0.25) * 4 * 255).toInt())
+            ratioAlt < 0.75 -> android.graphics.Color.rgb(((ratioAlt - 0.5) * 4 * 255).toInt(), 255, 0)
+            else -> android.graphics.Color.rgb(255, (255 - (ratioAlt - 0.75) * 4 * 255).toInt(), 0)
+        }
+        line.outlinePaint.color = color
+        
+        // Map speed to thickness
+        // Assuming 0 to 300 m/s (approx 1000 km/h) scale
+        val maxSpeed = 300.0
+        val ratioSpeed = (p2.speed / maxSpeed).coerceIn(0.0, 1.0)
+        val thickness = 5f + (ratioSpeed * 15f).toFloat() // 5 to 20 thickness
+        
+        line.outlinePaint.strokeWidth = thickness
+        line.outlinePaint.isAntiAlias = true
+        
+        map.overlays.add(line)
+        routeLines.add(line)
+        map.invalidate()
     }
 
     override fun onResume() {

@@ -210,6 +210,30 @@
                         <RadioButton android:id="@+id/rbClimbFpm" android:textColor="#A0A0A0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ft/min" />
                     </RadioGroup>
 
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginVertical="16dp"/>
+
+                    <!-- Logging Interval Units -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:text="Route Logging Interval"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+                    
+                    <RadioGroup
+                        android:id="@+id/rgLoggingInterval"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="5">
+                        <RadioButton android:id="@+id/rbLog1s" android:textColor="#A0A0A0" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:text="1s" android:checked="true"/>
+                        <RadioButton android:id="@+id/rbLog2s" android:textColor="#A0A0A0" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:text="2s" />
+                        <RadioButton android:id="@+id/rbLog3s" android:textColor="#A0A0A0" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:text="3s" />
+                        <RadioButton android:id="@+id/rbLog4s" android:textColor="#A0A0A0" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:text="4s" />
+                        <RadioButton android:id="@+id/rbLog5s" android:textColor="#A0A0A0" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:text="5s" />
+                    </RadioGroup>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

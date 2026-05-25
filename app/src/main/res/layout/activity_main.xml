@@ -193,6 +193,28 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabRecord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:src="@android:drawable/ic_media_play"
+            app:backgroundTint="#FF5252"
+            app:elevation="4dp"
+            app:fabSize="normal"
+            app:tint="#FFFFFF" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabRoutesList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            app:backgroundTint="#D91E1E24"
+            app:elevation="4dp"
+            app:fabSize="normal"
+            app:tint="#FFFFFF" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabSettings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

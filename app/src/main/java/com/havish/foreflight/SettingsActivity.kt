@@ -101,6 +101,26 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putString("unit_climb", unit).apply()
         }
 
+        // Logging Interval
+        when (prefs.getInt("logging_interval", 1)) {
+            2 -> findViewById<RadioButton>(R.id.rbLog2s).isChecked = true
+            3 -> findViewById<RadioButton>(R.id.rbLog3s).isChecked = true
+            4 -> findViewById<RadioButton>(R.id.rbLog4s).isChecked = true
+            5 -> findViewById<RadioButton>(R.id.rbLog5s).isChecked = true
+            else -> findViewById<RadioButton>(R.id.rbLog1s).isChecked = true
+        }
+
+        findViewById<RadioGroup>(R.id.rgLoggingInterval).setOnCheckedChangeListener { _, checkedId ->
+            val interval = when (checkedId) {
+                R.id.rbLog2s -> 2
+                R.id.rbLog3s -> 3
+                R.id.rbLog4s -> 4
+                R.id.rbLog5s -> 5
+                else -> 1
+            }
+            prefs.edit().putInt("logging_interval", interval).apply()
+        }
+
         updateCacheSize()
 
         findViewById<Button>(R.id.btnClearCache).setOnClickListener {
