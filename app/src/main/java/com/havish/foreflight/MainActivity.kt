@@ -180,6 +180,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
+        routeManager = RouteManager(this)
+
+        val fabRecord = findViewById<FloatingActionButton>(R.id.fabRecord)
+        fabRecord.setOnClickListener {
+            toggleRouteRecording(fabRecord)
+        }
+
+        findViewById<FloatingActionButton>(R.id.fabRoutesList).setOnClickListener {
+            showRoutesListDialog()
+        }
+
         findViewById<FloatingActionButton>(R.id.fabLocation).setOnClickListener {
             if (locationOverlay.isMyLocationEnabled && locationOverlay.myLocation != null) {
                 map.controller.animateTo(locationOverlay.myLocation)
@@ -888,7 +899,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun drawRouteSegment(p1: RoutePoint, p2: RoutePoint) {
-        val line = org.osmdroid.views.overlay.Polyline()
+        val line = org.osmdroid.views.overlay.Polyline(map)
         line.addPoint(GeoPoint(p1.lat, p1.lon))
         line.addPoint(GeoPoint(p2.lat, p2.lon))
         
