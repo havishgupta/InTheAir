@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Offline Maps Manager"
-        android:textColor="@color/text_blue_black"
+        android:textColor="@color/text_dark_grey"
         android:textSize="26sp"
         android:textStyle="bold"
         android:layout_margin="24dp"
@@ -26,7 +26,7 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="8dp"
         android:text="Manage your downloaded vector maps. Select a map to make it active."
-        android:textColor="@color/text_blue_black"
+        android:textColor="@color/text_dark_grey"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1. Download a .map file (e.g., from OpenAndroMaps).\n2. Tap the button below to pick the file.\n3. The app will securely copy it so you can use it offline while flying!"
-                android:textColor="@color/text_blue_black"
+                android:textColor="@color/text_dark_grey"
                 android:textSize="14sp"
                 android:layout_marginBottom="16dp"/>
 
@@ -66,8 +66,8 @@
                 android:id="@+id/btnLoadMapFile"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:backgroundTint="@color/sun_yellow"
-                android:textColor="@color/text_blue_black"
+                android:backgroundTint="@color/accent_yellow"
+                android:textColor="@color/text_dark_grey"
                 android:text="Pick .map File"
                 android:textStyle="bold"/>
         </LinearLayout>
@@ -94,7 +94,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="No offline maps found."
-        android:textColor="@color/text_blue_black"
+        android:textColor="@color/text_dark_grey"
         android:textSize="18sp"
         android:textStyle="bold"
         android:visibility="gone"
