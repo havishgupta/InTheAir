@@ -381,48 +381,7 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showGlobalNotesBottomSheet() {
-        val tags = globalNotesManager.getTags()
-        if (tags.isEmpty()) {
-            Toast.makeText(this, "No global notes yet. Long press on map to add.", Toast.LENGTH_LONG).show()
-            return
-        }
 
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_notes, null)
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-        dialog.setContentView(view)
-
-        val rv = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNoteGroups)
-        rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        
-        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
-
-        rv.adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
-                val v = LayoutInflater.from(parent.context).inflate(R.layout.item_note_group, parent, false)
-                return object : androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {}
-            }
-            override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
-                val tag = tags[position]
-                val v = holder.itemView
-                v.findViewById<TextView>(R.id.tvTagName).text = tag
-                
-                val count = globalNotesManager.getNotes().count { it.tag == tag }
-                v.findViewById<TextView>(R.id.tvTagCount).text = "$count notes"
-
-                val switchVis = v.findViewById<android.widget.Switch>(R.id.switchVisibility)
-                switchVis.isChecked = prefs.getBoolean("tag_vis_$tag", true)
-                switchVis.setOnCheckedChangeListener { _, isChecked ->
-                    prefs.edit().putBoolean("tag_vis_$tag", isChecked).apply()
-                    drawGlobalNotes()
-                }
-            }
-            override fun getItemCount() = tags.size
-        }
-
-        view.findViewById<View>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
-        dialog.show()
-    }
 
     private fun drawGlobalNotes() {
         // Remove existing global markers
@@ -446,51 +405,7 @@ class MainActivity : AppCompatActivity() {
         map.invalidate()
     }
 
-    private fun showVoyageBottomSheet() {
-        val voyages = voyageManager.getSavedVoyages()
-        if (voyages.isEmpty()) {
-            Toast.makeText(this, "No saved voyages", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_routes, null)
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-        dialog.setContentView(view)
 
-        val rv = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvVoyages)
-        rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-
-        rv.adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
-                val v = LayoutInflater.from(parent.context).inflate(R.layout.item_route_bottom_sheet, parent, false)
-                return object : androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {}
-            }
-            override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
-                val voyage = voyages[position]
-                val v = holder.itemView
-                v.findViewById<TextView>(R.id.tvVoyageName).text = voyage.name
-                v.findViewById<TextView>(R.id.tvVoyageInfo).text = "${java.text.SimpleDateFormat("MMM dd, yyyy").format(java.util.Date(voyage.startTime))} -- ${voyage.points.size} points"
-
-                v.findViewById<View>(R.id.ivView).setOnClickListener {
-                    dialog.dismiss()
-                    drawFullVoyage(voyage)
-                }
-                v.findViewById<View>(R.id.ivRename).setOnClickListener {
-                    dialog.dismiss()
-                    showRenameVoyageDialog(voyage)
-                }
-                v.findViewById<View>(R.id.ivDelete).setOnClickListener {
-                    dialog.dismiss()
-                    voyageManager.deleteVoyage(voyage.id)
-                    clearVoyageDrawing()
-                    Toast.makeText(this@MainActivity, "Deleted ${voyage.name}", Toast.LENGTH_SHORT).show()
-                }
-            }
-            override fun getItemCount() = voyages.size
-        }
-
-        view.findViewById<View>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
-        dialog.show()
-    }
 
     private fun setupAutoComplete(editText: AutoCompleteTextView) {
         val geocoder = Geocoder(this@MainActivity)
