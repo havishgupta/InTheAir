@@ -42,6 +42,13 @@ class OfflineMapsActivity : AppCompatActivity() {
             mapFilePicker.launch(arrayOf("*/*"))
         }
 
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val switchOfflineOnly = findViewById<android.widget.Switch>(R.id.switchOfflineOnly)
+        switchOfflineOnly.isChecked = prefs.getBoolean("offline_maps_only", false)
+        switchOfflineOnly.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("offline_maps_only", isChecked).apply()
+        }
+
         loadOfflineMaps()
     }
 

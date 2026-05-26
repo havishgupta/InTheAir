@@ -69,7 +69,31 @@
                 android:backgroundTint="@color/accent_yellow"
                 android:textColor="@color/text_dark_grey"
                 android:text="Pick .map File"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_grey"
+                android:layout_marginBottom="12dp"/>
+
+            <Switch
+                android:id="@+id/switchOfflineOnly"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Offline Maps Only"
+                android:textColor="@color/text_dark_grey"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Force the map to only use downloaded files"
+                android:textSize="12sp"
+                android:textColor="@color/text_medium_grey"
+                android:layout_marginTop="4dp"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

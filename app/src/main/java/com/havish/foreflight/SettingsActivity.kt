@@ -32,6 +32,7 @@ class SettingsActivity : AppCompatActivity() {
                 else -> "plane"
             }
             prefs.edit().putString("voyage_mode", mode).apply()
+            updateMapKey()
         }
 
         // Speed Units
@@ -50,6 +51,7 @@ class SettingsActivity : AppCompatActivity() {
                 else -> "kts"
             }
             prefs.edit().putString("unit_speed", unit).apply()
+            updateMapKey()
         }
 
         // Altitude Units
@@ -68,6 +70,7 @@ class SettingsActivity : AppCompatActivity() {
                 else -> "ft"
             }
             prefs.edit().putString("unit_alt", unit).apply()
+            updateMapKey()
         }
 
         // Climb Rate Units
@@ -112,5 +115,51 @@ class SettingsActivity : AppCompatActivity() {
         switchDebug.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("debug_mode", isChecked).apply()
         }
+
+        // Offline Maps Only
+        val switchOfflineOnly = findViewById<android.widget.Switch>(R.id.switchOfflineOnly)
+        switchOfflineOnly.isChecked = prefs.getBoolean("offline_maps_only", false)
+        switchOfflineOnly.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("offline_maps_only", isChecked).apply()
+        }
+
+        updateMapKey()
+    }
+
+    private fun updateMapKey() {
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val mode = prefs.getString("voyage_mode", "plane") ?: "plane"
+        val altUnit = prefs.getString("unit_alt", "m") ?: "m"
+        val speedUnit = prefs.getString("unit_speed", "kmh") ?: "kmh"
+
+        val maxAltMeters = if (mode == "car") 609.0 else 12000.0
+        val maxSpeedMs = if (mode == "car") 55.5 else 300.0
+
+        val midAltMeters = maxAltMeters / 2.0
+
+        fun convertAlt(meters: Double): String {
+            return when (altUnit) {
+                "m" -> String.format("%.0fm", meters)
+                "km" -> String.format("%.1fkm", meters / 1000.0)
+                "bk" -> String.format("%.1fbk", meters / 828.0)
+                else -> String.format("%.0fft", meters * 3.28084)
+            }
+        }
+
+        findViewById<android.widget.TextView>(R.id.tvKeyAltLow).text = "0$altUnit"
+        findViewById<android.widget.TextView>(R.id.tvKeyAltMid).text = convertAlt(midAltMeters)
+        findViewById<android.widget.TextView>(R.id.tvKeyAltHigh).text = convertAlt(maxAltMeters) + "+"
+
+        fun convertSpeed(ms: Double): String {
+            return when (speedUnit) {
+                "kmh" -> String.format("%.0fkm/h", ms * 3.6)
+                "mph" -> String.format("%.0fmph", ms * 2.23694)
+                "mach" -> String.format("%.2fM", ms / 343.0)
+                else -> String.format("%.0fkts", ms * 1.94384)
+            }
+        }
+
+        findViewById<android.widget.TextView>(R.id.tvKeySpeedSlow).text = "  0$speedUnit  "
+        findViewById<android.widget.TextView>(R.id.tvKeySpeedFast).text = "  ${convertSpeed(maxSpeedMs)}+"
     }
 }

@@ -273,10 +273,6 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
             startActivity(Intent(this, OfflineMapsActivity::class.java))
         }
-        view.findViewById<View>(R.id.menuItemDownloadMaps).setOnClickListener {
-            dialog.dismiss()
-            showRoutePlanDialog()
-        }
         view.findViewById<View>(R.id.menuItemSettings).setOnClickListener {
             dialog.dismiss()
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -688,6 +684,7 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton("Save") { _, _ ->
                         val newName = input.text.toString()
                         if (newName.isNotBlank()) voyage?.name = newName
+                        voyage?.let { voyageManager.saveVoyage(it) }
                         recordingService?.stopRecording()
                         clearVoyageDrawing()
                         updateRecordingUI()

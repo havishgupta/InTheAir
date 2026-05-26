@@ -279,6 +279,24 @@
                         android:text="Shows raw GPS data and compass overlay on the map"
                         android:textSize="12sp"
                         android:textColor="@color/text_medium_grey"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <Switch
+                        android:id="@+id/switchOfflineOnly"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Offline Maps Only"
+                        android:textColor="@color/text_dark_grey"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Force the map to only use downloaded files"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_medium_grey"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -328,9 +346,9 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_marginBottom="16dp">
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Low" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="start"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Mid" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="center"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="High" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="end"/>
+                        <TextView android:id="@+id/tvKeyAltLow" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="0" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="start"/>
+                        <TextView android:id="@+id/tvKeyAltMid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Mid" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="center"/>
+                        <TextView android:id="@+id/tvKeyAltHigh" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="High" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="end"/>
                     </LinearLayout>
 
                     <TextView
@@ -348,10 +366,10 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
                         <View android:layout_width="40dp" android:layout_height="2dp" android:background="@color/sky_blue"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="  Slow  " android:textColor="@color/text_medium_grey" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvKeySpeedSlow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="  0  " android:textColor="@color/text_medium_grey" android:textSize="12sp"/>
                         <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
                         <View android:layout_width="60dp" android:layout_height="8dp" android:background="@color/deep_sky_blue"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="  Fast" android:textColor="@color/text_medium_grey" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvKeySpeedFast" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="  Fast" android:textColor="@color/text_medium_grey" android:textSize="12sp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
