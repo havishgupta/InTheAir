@@ -966,10 +966,30 @@ class MainActivity : AppCompatActivity() {
         ratioAlt = ratioAlt.coerceIn(0.0, 1.0)
 
         val color = when {
-            ratioAlt < 0.25 -> android.graphics.Color.rgb(0, (ratioAlt * 4 * 255).toInt(), 255)
-            ratioAlt < 0.5 -> android.graphics.Color.rgb(0, 255, (255 - (ratioAlt - 0.25) * 4 * 255).toInt())
-            ratioAlt < 0.75 -> android.graphics.Color.rgb(((ratioAlt - 0.5) * 4 * 255).toInt(), 255, 0)
-            else -> android.graphics.Color.rgb(255, (255 - (ratioAlt - 0.75) * 4 * 255).toInt(), 0)
+            ratioAlt < 0.33 -> {
+                val fraction = ratioAlt * 3.0
+                android.graphics.Color.rgb(
+                    (255 - fraction * 255).toInt().coerceIn(0, 255),
+                    255,
+                    (224 - fraction * 224).toInt().coerceIn(0, 255)
+                )
+            }
+            ratioAlt < 0.66 -> {
+                val fraction = (ratioAlt - 0.33) * 3.0
+                android.graphics.Color.rgb(
+                    0,
+                    (255 - fraction * 255).toInt().coerceIn(0, 255),
+                    (fraction * 255).toInt().coerceIn(0, 255)
+                )
+            }
+            else -> {
+                val fraction = (ratioAlt - 0.66) * 3.0
+                android.graphics.Color.rgb(
+                    (fraction * 128).toInt().coerceIn(0, 255),
+                    0,
+                    (255 - fraction * 127).toInt().coerceIn(0, 255)
+                )
+            }
         }
         line.outlinePaint.color = color
 
