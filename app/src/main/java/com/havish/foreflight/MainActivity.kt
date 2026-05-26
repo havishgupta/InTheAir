@@ -310,7 +310,7 @@ class MainActivity : AppCompatActivity() {
 
         view.findViewById<View>(R.id.menuItemVoyages).setOnClickListener {
             dialog.dismiss()
-            showVoyageBottomSheet()
+            startActivity(Intent(this, VoyagesActivity::class.java))
         }
         view.findViewById<View>(R.id.menuItemOfflineMaps).setOnClickListener {
             dialog.dismiss()
@@ -318,7 +318,7 @@ class MainActivity : AppCompatActivity() {
         }
         view.findViewById<View>(R.id.menuItemNotes)?.setOnClickListener {
             dialog.dismiss()
-            showGlobalNotesBottomSheet()
+            startActivity(Intent(this, GlobalNotesActivity::class.java))
         }
         view.findViewById<View>(R.id.menuItemSettings).setOnClickListener {
             dialog.dismiss()
