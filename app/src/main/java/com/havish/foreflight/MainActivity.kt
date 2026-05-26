@@ -204,14 +204,44 @@ class MainActivity : AppCompatActivity() {
         voyageManager = VoyageManager(this)
         globalNotesManager = GlobalNotesManager(this)
 
-        val mapEventsReceiver = object : MapEventsReceiver {
-            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean = false
-            override fun longPressHelper(p: GeoPoint?): Boolean {
-                if (p != null) showAddGlobalNoteDialog(p)
-                return true
+        val customLongPressOverlay = object : org.osmdroid.views.overlay.Overlay() {
+            var downX = 0f
+            var downY = 0f
+            val handler = android.os.Handler(android.os.Looper.getMainLooper())
+            var runnable: Runnable? = null
+            
+            override fun onTouchEvent(event: android.view.MotionEvent, mapView: MapView): Boolean {
+                val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+                if (!prefs.getBoolean("enable_long_press_note", true)) {
+                    return super.onTouchEvent(event, mapView)
+                }
+                
+                when (event.actionMasked) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        downX = event.x
+                        downY = event.y
+                        val p = map.projection.fromPixels(event.x.toInt(), event.y.toInt()) as GeoPoint
+                        val duration = prefs.getInt("long_press_duration", 500).toLong()
+                        runnable = Runnable {
+                            showAddGlobalNoteDialog(p)
+                        }
+                        handler.postDelayed(runnable!!, duration)
+                    }
+                    android.view.MotionEvent.ACTION_MOVE -> {
+                        if (Math.abs(event.x - downX) > 20 || Math.abs(event.y - downY) > 20) {
+                            runnable?.let { handler.removeCallbacks(it) }
+                            runnable = null
+                        }
+                    }
+                    android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                        runnable?.let { handler.removeCallbacks(it) }
+                        runnable = null
+                    }
+                }
+                return super.onTouchEvent(event, mapView)
             }
         }
-        map.overlays.add(MapEventsOverlay(mapEventsReceiver))
+        map.overlays.add(customLongPressOverlay)
 
         val fabRecord = findViewById<FloatingActionButton>(R.id.fabRecord)
         fabRecord.setOnClickListener {
@@ -288,9 +318,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateRecordingUI() {
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
         val fab = findViewById<FloatingActionButton>(R.id.fabRecord)
         val fabNote = findViewById<FloatingActionButton>(R.id.fabAddNote)
-        if (recordingService?.isRecording() == true) {
+        val telemetryDashboard = findViewById<View>(R.id.telemetryDashboard)
+        val tvModeIndicator = findViewById<View>(R.id.tvModeIndicator)
+        
+        if (prefs.getBoolean("show_voyage_btn", true)) {
+            fab.visibility = View.VISIBLE
+        } else {
+            fab.visibility = View.GONE
+        }
+
+        if (prefs.getBoolean("show_mode_indicator", true)) {
+            tvModeIndicator.visibility = View.VISIBLE
+        } else {
+            tvModeIndicator.visibility = View.GONE
+        }
+
+        val isRecording = recordingService?.isRecording() == true
+        
+        when (prefs.getString("telemetry_visibility", "always")) {
+            "hidden" -> telemetryDashboard.visibility = View.GONE
+            "voyage" -> telemetryDashboard.visibility = if (isRecording) View.VISIBLE else View.GONE
+            else -> telemetryDashboard.visibility = View.VISIBLE
+        }
+
+        if (isRecording) {
             fabNote.visibility = View.VISIBLE
             if (recordingService?.isPaused() == true) {
                 fab.setImageResource(android.R.drawable.ic_media_play)

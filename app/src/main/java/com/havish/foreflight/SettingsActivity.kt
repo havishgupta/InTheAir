@@ -109,6 +109,57 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putInt("logging_interval", interval).apply()
         }
 
+        // Customization: Mode Indicator
+        val switchModeIndicator = findViewById<android.widget.Switch>(R.id.switchModeIndicator)
+        switchModeIndicator.isChecked = prefs.getBoolean("show_mode_indicator", true)
+        switchModeIndicator.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("show_mode_indicator", isChecked).apply()
+        }
+
+        // Customization: Voyage Button
+        val switchVoyageBtn = findViewById<android.widget.Switch>(R.id.switchVoyageBtn)
+        switchVoyageBtn.isChecked = prefs.getBoolean("show_voyage_btn", true)
+        switchVoyageBtn.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("show_voyage_btn", isChecked).apply()
+        }
+
+        // Customization: Long Press Note
+        val switchLongPressNote = findViewById<android.widget.Switch>(R.id.switchLongPressNote)
+        switchLongPressNote.isChecked = prefs.getBoolean("enable_long_press_note", true)
+        switchLongPressNote.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("enable_long_press_note", isChecked).apply()
+        }
+
+        // Customization: Long Press Duration
+        when (prefs.getInt("long_press_duration", 500)) {
+            1000 -> findViewById<RadioButton>(R.id.rbLongPress1000).isChecked = true
+            1500 -> findViewById<RadioButton>(R.id.rbLongPress1500).isChecked = true
+            else -> findViewById<RadioButton>(R.id.rbLongPress500).isChecked = true
+        }
+        findViewById<RadioGroup>(R.id.rgLongPressDuration).setOnCheckedChangeListener { _, checkedId ->
+            val duration = when (checkedId) {
+                R.id.rbLongPress1000 -> 1000
+                R.id.rbLongPress1500 -> 1500
+                else -> 500
+            }
+            prefs.edit().putInt("long_press_duration", duration).apply()
+        }
+
+        // Customization: Telemetry Visibility
+        when (prefs.getString("telemetry_visibility", "always")) {
+            "voyage" -> findViewById<RadioButton>(R.id.rbTeleVoyage).isChecked = true
+            "hidden" -> findViewById<RadioButton>(R.id.rbTeleHidden).isChecked = true
+            else -> findViewById<RadioButton>(R.id.rbTeleAlways).isChecked = true
+        }
+        findViewById<RadioGroup>(R.id.rgTelemetryVis).setOnCheckedChangeListener { _, checkedId ->
+            val visibility = when (checkedId) {
+                R.id.rbTeleVoyage -> "voyage"
+                R.id.rbTeleHidden -> "hidden"
+                else -> "always"
+            }
+            prefs.edit().putString("telemetry_visibility", visibility).apply()
+        }
+
         // Debug Mode
         val switchDebug = findViewById<android.widget.Switch>(R.id.switchDebugMode)
         switchDebug.isChecked = prefs.getBoolean("debug_mode", false)
