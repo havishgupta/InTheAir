@@ -22,43 +22,32 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvMapName"
+                android:id="@+id/tvTagName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Map Name"
-                android:textColor="@color/text_dark_grey"
-                android:textSize="16sp"
+                android:text="Tag Name"
+                android:textColor="@color/deep_sky_blue"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"/>
 
             <TextView
-                android:id="@+id/tvMapSize"
+                android:id="@+id/tvTagCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Size: 0.0 MB"
+                android:text="0 notes"
                 android:textColor="@color/text_medium_grey"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"/>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnActive"
+        <Switch
+            android:id="@+id/switchVisibility"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:text="Set Active"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/sky_blue"
-            android:textStyle="bold"
-            android:layout_marginEnd="16dp"/>
-
-        <ImageView
-            android:id="@+id/btnDelete"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@android:drawable/ic_menu_delete"
-            android:tint="@color/red_error"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Delete Map" />
+            android:layout_height="wrap_content"
+            android:text="Visible"
+            android:textColor="@color/text_dark_grey"
+            android:textSize="14sp"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

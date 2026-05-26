@@ -35,6 +35,10 @@ class OfflineMapsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_offline_maps)
 
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
         mapsListContainer = findViewById(R.id.mapsListContainer)
         tvEmpty = findViewById(R.id.tvEmpty)
 

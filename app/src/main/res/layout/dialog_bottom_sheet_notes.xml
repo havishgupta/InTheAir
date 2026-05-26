@@ -19,7 +19,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Saved Voyages"
+        android:text="Global Notes"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@color/text_dark_grey"
@@ -27,7 +27,7 @@
         android:layout_marginBottom="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvVoyages"
+        android:id="@+id/rvNoteGroups"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"

@@ -51,6 +51,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.mapsforge.MapsForgeTileSource
 import org.osmdroid.mapsforge.MapsForgeTileProvider
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
@@ -89,6 +91,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
 
     private lateinit var voyageManager: VoyageManager
+    private lateinit var globalNotesManager: GlobalNotesManager
     private val voyageLines = mutableListOf<org.osmdroid.views.overlay.Polyline>()
 
     private var recordingService: VoyageRecordingService? = null
@@ -199,6 +202,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         voyageManager = VoyageManager(this)
+        globalNotesManager = GlobalNotesManager(this)
+
+        val mapEventsReceiver = object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean = false
+            override fun longPressHelper(p: GeoPoint?): Boolean {
+                if (p != null) showAddGlobalNoteDialog(p)
+                return true
+            }
+        }
+        map.overlays.add(MapEventsOverlay(mapEventsReceiver))
 
         val fabRecord = findViewById<FloatingActionButton>(R.id.fabRecord)
         fabRecord.setOnClickListener {
@@ -244,6 +257,36 @@ class MainActivity : AppCompatActivity() {
         ivCompassArrow = findViewById(R.id.ivCompassArrow)
     }
 
+    private fun showAddGlobalNoteDialog(p: GeoPoint) {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_route_plan, null)
+        val etText = view.findViewById<AutoCompleteTextView>(R.id.etFrom)
+        val etTag = view.findViewById<AutoCompleteTextView>(R.id.etTo)
+        etText.hint = "Note text (e.g. Speed breaker)"
+        etTag.hint = "Group/Tag (e.g. Hazard)"
+        
+        view.findViewById<Button>(R.id.btnDownload).visibility = View.GONE
+        view.findViewById<Button>(R.id.btnDownloadManual).visibility = View.GONE
+        view.findViewById<Button>(R.id.btnDownloadIndia).visibility = View.GONE
+
+        val tags = globalNotesManager.getTags()
+        etTag.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, tags))
+
+        AlertDialog.Builder(this)
+            .setTitle("Add Global Note")
+            .setView(view)
+            .setPositiveButton("Save") { _, _ ->
+                val text = etText.text.toString().trim()
+                val tag = etTag.text.toString().trim().ifBlank { "General" }
+                if (text.isNotBlank()) {
+                    globalNotesManager.addNote(p.latitude, p.longitude, text, tag)
+                    drawGlobalNotes()
+                    Toast.makeText(this, "Note saved to $tag", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun updateRecordingUI() {
         val fab = findViewById<FloatingActionButton>(R.id.fabRecord)
         val fabNote = findViewById<FloatingActionButton>(R.id.fabAddNote)
@@ -273,11 +316,80 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
             startActivity(Intent(this, OfflineMapsActivity::class.java))
         }
+        view.findViewById<View>(R.id.menuItemNotes)?.setOnClickListener {
+            dialog.dismiss()
+            showGlobalNotesBottomSheet()
+        }
         view.findViewById<View>(R.id.menuItemSettings).setOnClickListener {
             dialog.dismiss()
             startActivity(Intent(this, SettingsActivity::class.java))
         }
         dialog.show()
+    }
+
+    private fun showGlobalNotesBottomSheet() {
+        val tags = globalNotesManager.getTags()
+        if (tags.isEmpty()) {
+            Toast.makeText(this, "No global notes yet. Long press on map to add.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_notes, null)
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+        dialog.setContentView(view)
+
+        val rv = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNoteGroups)
+        rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+
+        rv.adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
+                val v = LayoutInflater.from(parent.context).inflate(R.layout.item_note_group, parent, false)
+                return object : androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {}
+            }
+            override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+                val tag = tags[position]
+                val v = holder.itemView
+                v.findViewById<TextView>(R.id.tvTagName).text = tag
+                
+                val count = globalNotesManager.getNotes().count { it.tag == tag }
+                v.findViewById<TextView>(R.id.tvTagCount).text = "$count notes"
+
+                val switchVis = v.findViewById<android.widget.Switch>(R.id.switchVisibility)
+                switchVis.isChecked = prefs.getBoolean("tag_vis_$tag", true)
+                switchVis.setOnCheckedChangeListener { _, isChecked ->
+                    prefs.edit().putBoolean("tag_vis_$tag", isChecked).apply()
+                    drawGlobalNotes()
+                }
+            }
+            override fun getItemCount() = tags.size
+        }
+
+        view.findViewById<View>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun drawGlobalNotes() {
+        // Remove existing global markers
+        val toRemove = map.overlays.filter { it is org.osmdroid.views.overlay.Marker && it.id == "global_note" }
+        map.overlays.removeAll(toRemove)
+
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val allNotes = globalNotesManager.getNotes()
+
+        for (note in allNotes) {
+            val isVisible = prefs.getBoolean("tag_vis_${note.tag}", true)
+            if (isVisible) {
+                val marker = org.osmdroid.views.overlay.Marker(map)
+                marker.id = "global_note"
+                marker.position = GeoPoint(note.lat, note.lon)
+                marker.title = "[${note.tag}] ${note.text}"
+                marker.icon = ContextCompat.getDrawable(this, R.drawable.ic_note_marker)
+                map.overlays.add(marker)
+            }
+        }
+        map.invalidate()
     }
 
     private fun showVoyageBottomSheet() {
@@ -828,6 +940,7 @@ class MainActivity : AppCompatActivity() {
         checkForSavedMapFile()
         checkIntentForRoute(intent)
         updateRecordingUI()
+        drawGlobalNotes()
     }
 
     override fun onNewIntent(intent: Intent?) {

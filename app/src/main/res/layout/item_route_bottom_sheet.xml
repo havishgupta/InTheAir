@@ -1,73 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="16dp"
-    android:gravity="center_vertical"
-    android:background="?android:attr/selectableItemBackground">
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="@color/card_surface"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_marginEnd="12dp">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvVoyageName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Voyage Name"
-            android:textColor="@color/text_dark_grey"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:maxLines="1"
-            android:ellipsize="end"/>
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvVoyageInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="May 26, 2026 -- 0 points"
-            android:textColor="@color/text_medium_grey"
-            android:textSize="13sp"
-            android:layout_marginTop="2dp"
-            android:maxLines="1"
-            android:ellipsize="end"/>
+            <TextView
+                android:id="@+id/tvVoyageName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voyage Name"
+                android:textColor="@color/deep_sky_blue"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"/>
+
+            <TextView
+                android:id="@+id/tvVoyageInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date -- 0 points"
+                android:textColor="@color/text_medium_grey"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivView"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_view"
+            android:tint="@color/text_dark_grey"
+            android:padding="6dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="View voyage"/>
+
+        <ImageView
+            android:id="@+id/ivRename"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_edit"
+            android:tint="@color/text_dark_grey"
+            android:padding="6dp"
+            android:layout_marginStart="8dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Rename voyage"/>
+
+        <ImageView
+            android:id="@+id/ivDelete"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:tint="@color/red_error"
+            android:padding="6dp"
+            android:layout_marginStart="8dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete voyage"/>
+
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/ivView"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:src="@android:drawable/ic_menu_mapmode"
-        android:tint="@color/deep_sky_blue"
-        android:padding="6dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:layout_marginEnd="4dp"
-        android:contentDescription="View on map"/>
-
-    <ImageView
-        android:id="@+id/ivRename"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:src="@android:drawable/ic_menu_edit"
-        android:tint="@color/text_medium_grey"
-        android:padding="6dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:layout_marginEnd="4dp"
-        android:contentDescription="Rename voyage"/>
-
-    <ImageView
-        android:id="@+id/ivDelete"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:src="@android:drawable/ic_menu_delete"
-        android:tint="@color/red_error"
-        android:padding="6dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Delete voyage"/>
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>

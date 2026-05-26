@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Modern Theme Colors - Dark Mode -->
+    <color name="sky_blue">#1A4050</color> <!-- Darker muted blue for background -->
+    <color name="deep_sky_blue">#00BFFF</color> <!-- Keep primary bright for contrast -->
+    <color name="cloud_white">#1E1E1E</color> <!-- Dark surface for cards/containers -->
+    <color name="text_dark_grey">#E0E0E0</color> <!-- Light text -->
+    <color name="text_medium_grey">#A0A0A0</color> <!-- Medium light text -->
+    <color name="accent_yellow">#FFD700</color> <!-- Keep yellow accent -->
+    <color name="translucent_white">#CC1E1E1E</color>
+    <color name="translucent_bg">#801E1E1E</color>
+    <color name="red_error">#FF6B6B</color>
+    <color name="divider_grey">#333333</color> <!-- Dark divider -->
+    <color name="page_background">#121212</color> <!-- Very dark background -->
+    <color name="card_surface">#2D2D2D</color> <!-- Elevated dark surface -->
+    <color name="menu_item_ripple">#1400BFFF</color>
+    <color name="recording_red">#EF4444</color>
+    <color name="recording_red_dark">#DC2626</color>
+    <color name="pause_amber">#F59E0B</color>
+</resources>
