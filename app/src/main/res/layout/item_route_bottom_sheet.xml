@@ -7,43 +7,67 @@
     android:gravity="center_vertical"
     android:background="?android:attr/selectableItemBackground">
 
-    <TextView
-        android:id="@+id/tvRouteName"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Route Name"
-        android:textColor="@color/text_dark_grey"
-        android:textSize="16sp"
-        android:textStyle="bold"/>
+        android:orientation="vertical"
+        android:layout_marginEnd="12dp">
+
+        <TextView
+            android:id="@+id/tvVoyageName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voyage Name"
+            android:textColor="@color/text_dark_grey"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <TextView
+            android:id="@+id/tvVoyageInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="May 26, 2026 -- 0 points"
+            android:textColor="@color/text_medium_grey"
+            android:textSize="13sp"
+            android:layout_marginTop="2dp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/ivView"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:src="@android:drawable/ic_menu_mapmode"
         android:tint="@color/deep_sky_blue"
-        android:padding="4dp"
+        android:padding="6dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="4dp"
+        android:contentDescription="View on map"/>
 
     <ImageView
         android:id="@+id/ivRename"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:src="@android:drawable/ic_menu_edit"
-        android:tint="@color/text_dark_grey"
-        android:padding="4dp"
+        android:tint="@color/text_medium_grey"
+        android:padding="6dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="4dp"
+        android:contentDescription="Rename voyage"/>
 
     <ImageView
         android:id="@+id/ivDelete"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:src="@android:drawable/ic_menu_delete"
         android:tint="@color/red_error"
-        android:padding="4dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"/>
+        android:padding="6dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Delete voyage"/>
 
 </LinearLayout>

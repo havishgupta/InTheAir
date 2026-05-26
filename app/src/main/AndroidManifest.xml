@@ -10,7 +10,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     
-    <!-- Removed POST_NOTIFICATIONS per user request -->
+    <!-- Foreground service for background voyage recording -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -40,6 +42,11 @@
             
         <activity
             android:name=".OfflineMapsActivity"
+            android:exported="false" />
+        
+        <service
+            android:name=".VoyageRecordingService"
+            android:foregroundServiceType="location"
             android:exported="false" />
     </application>
 

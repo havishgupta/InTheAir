@@ -52,8 +52,9 @@
                     android:layout_height="wrap_content"
                     android:text="SPEED"
                     android:textColor="@color/text_dark_grey"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
                     android:id="@+id/tvSpeed"
@@ -62,8 +63,9 @@
                     android:layout_marginTop="4dp"
                     android:text="--"
                     android:textColor="@color/deep_sky_blue"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
             <!-- ALTITUDE -->
@@ -79,8 +81,9 @@
                     android:layout_height="wrap_content"
                     android:text="ALT"
                     android:textColor="@color/text_dark_grey"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
                     android:id="@+id/tvAlt"
@@ -89,8 +92,9 @@
                     android:layout_marginTop="4dp"
                     android:text="--"
                     android:textColor="@color/deep_sky_blue"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
             <!-- HEADING -->
@@ -106,8 +110,9 @@
                     android:layout_height="wrap_content"
                     android:text="HDG"
                     android:textColor="@color/text_dark_grey"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
                     android:id="@+id/tvHeading"
@@ -116,8 +121,9 @@
                     android:layout_marginTop="4dp"
                     android:text="--"
                     android:textColor="@color/deep_sky_blue"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
             <!-- CLIMB -->
@@ -133,8 +139,9 @@
                     android:layout_height="wrap_content"
                     android:text="CLIMB"
                     android:textColor="@color/text_dark_grey"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
                     android:id="@+id/tvClimb"
@@ -143,8 +150,9 @@
                     android:layout_marginTop="4dp"
                     android:text="--"
                     android:textColor="@color/deep_sky_blue"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
             <!-- CLIMB ANGLE -->
@@ -160,8 +168,9 @@
                     android:layout_height="wrap_content"
                     android:text="ANG"
                     android:textColor="@color/text_dark_grey"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
                     android:id="@+id/tvClimbAngle"
@@ -170,12 +179,30 @@
                     android:layout_marginTop="4dp"
                     android:text="--"
                     android:textColor="@color/deep_sky_blue"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <!-- Mode Indicator (bottom left) -->
+    <TextView
+        android:id="@+id/tvModeIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/mode_chip_bg"
+        android:text="PLANE"
+        android:textColor="@color/white"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Side Action Buttons -->
     <LinearLayout
@@ -187,28 +214,44 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Add Note FAB (only visible during recording) -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:src="@drawable/ic_add_note"
+            android:visibility="gone"
+            app:backgroundTint="@color/accent_yellow"
+            app:elevation="2dp"
+            app:fabSize="mini"
+            app:tint="@color/white" />
+
+        <!-- Record/Pause FAB -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabRecord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:src="@android:drawable/ic_media_play"
             app:backgroundTint="@color/translucent_white"
             app:elevation="0dp"
             app:fabSize="normal"
             app:tint="@color/deep_sky_blue" />
 
+        <!-- Menu FAB (hamburger icon) -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabSettings"
+            android:id="@+id/fabMenu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_gear"
+            android:layout_marginBottom="12dp"
+            android:src="@drawable/ic_menu"
             app:backgroundTint="@color/translucent_white"
             app:elevation="0dp"
             app:fabSize="normal"
             app:tint="@color/deep_sky_blue" />
 
+        <!-- Location FAB -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabLocation"
             android:layout_width="wrap_content"
@@ -225,7 +268,7 @@
         android:id="@+id/cardDebugMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="80dp"
         android:layout_marginStart="16dp"
         android:visibility="gone"
         app:cardBackgroundColor="@color/translucent_white"
@@ -255,10 +298,10 @@
             <RelativeLayout
                 android:layout_width="80dp"
                 android:layout_height="80dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="N 0°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S 180°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="W 270°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentStart="true" android:layout_centerVertical="true"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="E 90°" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentEnd="true" android:layout_centerVertical="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="N 0" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S 180" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="W 270" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentStart="true" android:layout_centerVertical="true"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="E 90" android:textColor="@color/text_dark_grey" android:textSize="8sp" android:layout_alignParentEnd="true" android:layout_centerVertical="true"/>
                 
                 <ImageView
                     android:id="@+id/ivCompassArrow"
