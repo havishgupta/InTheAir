@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         voyageManager = VoyageManager(this)
-        globalNotesManager = GlobalNotesManager(this)
+        notesManager = NotesManager(this)
 
         val customLongPressOverlay = object : org.osmdroid.views.overlay.Overlay() {
             var downX = 0f
@@ -958,5 +958,8 @@ class MainActivity : AppCompatActivity() {
         map.onPause()
         locationOverlay.disableMyLocation()
         fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+}
+dLocationClient.removeLocationUpdates(locationCallback)
     }
 }
