@@ -315,7 +315,7 @@ class MainActivity : AppCompatActivity() {
             } else false
         }
 
-        AlertDialog.Builder(this)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
             .setTitle("Add Note")
             .setView(view)
             .setPositiveButton("Save") { _, _ ->
@@ -349,13 +349,14 @@ class MainActivity : AppCompatActivity() {
                     else -> "ic_note_marker"
                 }
 
-                if (text.isNotBlank()) {
-                    notesManager.addNote(p.latitude, p.longitude, text, selectedTags.toList(), icon)
-                    drawNotes()
-                    Toast.makeText(this, "Note saved to ${selectedTags.first()}", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Note text cannot be empty", Toast.LENGTH_SHORT).show()
+                val finalText = if (text.isNotBlank()) text else {
+                    val sdf = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
+                    sdf.format(java.util.Date())
                 }
+
+                notesManager.addNote(p.latitude, p.longitude, finalText, selectedTags.toList(), icon)
+                drawNotes()
+                Toast.makeText(this, "Note saved to ${selectedTags.first()}", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -394,6 +395,13 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             fab.setImageResource(android.R.drawable.ic_media_play)
+        }
+
+        val llAltitudeKey = findViewById<View>(R.id.llAltitudeKey)
+        if (isRecording && prefs.getBoolean("show_altitude_key", true)) {
+            llAltitudeKey?.visibility = View.VISIBLE
+        } else if (!isRecording) {
+            llAltitudeKey?.visibility = View.GONE
         }
     }
 
@@ -829,7 +837,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 dialogView.findViewById<android.widget.Button>(R.id.btnDiscard).setOnClickListener {
-                    AlertDialog.Builder(this)
+                    com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                         .setTitle("Confirm Discard")
                         .setMessage("Are you sure you want to discard this voyage?")
                         .setPositiveButton("Discard") { _, _ ->
@@ -872,7 +880,7 @@ class MainActivity : AppCompatActivity() {
     private fun showRenameVoyageDialog(voyage: VoyageData) {
         val input = android.widget.EditText(this)
         input.setText(voyage.name)
-        AlertDialog.Builder(this)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
             .setTitle("Rename Voyage")
             .setView(input)
             .setPositiveButton("Save") { _, _ ->
@@ -890,9 +898,10 @@ class MainActivity : AppCompatActivity() {
         for (line in voyageLines) map.overlays.remove(line)
         voyageLines.clear()
         
-        val toRemove = map.overlays.filter { it is org.osmdroid.views.overlay.Marker }
+        val toRemove = map.overlays.filter { it is org.osmdroid.views.overlay.Marker && it.id == "voyage_note" }
         map.overlays.removeAll(toRemove)
         
+        findViewById<View>(R.id.llAltitudeKey)?.visibility = View.GONE
         map.invalidate()
     }
 
@@ -912,10 +921,16 @@ class MainActivity : AppCompatActivity() {
         map.controller.animateTo(GeoPoint(startPt.lat, startPt.lon))
         map.controller.setZoom(12.0)
         Toast.makeText(this, "Viewing: ${voyage.name}", Toast.LENGTH_SHORT).show()
+
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("show_altitude_key", true)) {
+            findViewById<View>(R.id.llAltitudeKey)?.visibility = View.VISIBLE
+        }
     }
     
     private fun drawNoteMarker(lat: Double, lon: Double, text: String) {
         val marker = org.osmdroid.views.overlay.Marker(map)
+        marker.id = "voyage_note"
         marker.position = GeoPoint(lat, lon)
         marker.title = text
         marker.icon = ContextCompat.getDrawable(this, R.drawable.ic_note_marker)
