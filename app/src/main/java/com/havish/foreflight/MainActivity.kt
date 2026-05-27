@@ -389,7 +389,7 @@ class MainActivity : AppCompatActivity() {
         map.overlays.removeAll(toRemove)
 
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
-        val allNotes = globalNotesManager.getNotes()
+        val allNotes = notesManager.getNotes()
 
         for (note in allNotes) {
             val isVisible = prefs.getBoolean("tag_vis_${note.tag}", true)
@@ -398,7 +398,14 @@ class MainActivity : AppCompatActivity() {
                 marker.id = "global_note"
                 marker.position = GeoPoint(note.lat, note.lon)
                 marker.title = "[${note.tag}] ${note.text}"
-                marker.icon = ContextCompat.getDrawable(this, R.drawable.ic_note_marker)
+                
+                val iconResId = resources.getIdentifier(note.icon, "drawable", packageName)
+                if (iconResId != 0) {
+                    marker.icon = ContextCompat.getDrawable(this, iconResId)
+                } else {
+                    marker.icon = ContextCompat.getDrawable(this, R.drawable.ic_note_marker)
+                }
+                
                 map.overlays.add(marker)
             }
         }
@@ -958,8 +965,5 @@ class MainActivity : AppCompatActivity() {
         map.onPause()
         locationOverlay.disableMyLocation()
         fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-}
-dLocationClient.removeLocationUpdates(locationCallback)
     }
 }
