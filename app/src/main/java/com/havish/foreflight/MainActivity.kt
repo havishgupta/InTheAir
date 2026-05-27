@@ -372,7 +372,7 @@ class MainActivity : AppCompatActivity() {
         }
         view.findViewById<View>(R.id.menuItemNotes)?.setOnClickListener {
             dialog.dismiss()
-            startActivity(Intent(this, GlobalNotesActivity::class.java))
+            startActivity(Intent(this, NotesActivity::class.java))
         }
         view.findViewById<View>(R.id.menuItemSettings).setOnClickListener {
             dialog.dismiss()
@@ -965,5 +965,8 @@ class MainActivity : AppCompatActivity() {
         map.onPause()
         locationOverlay.disableMyLocation()
         fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+}
+
     }
 }
