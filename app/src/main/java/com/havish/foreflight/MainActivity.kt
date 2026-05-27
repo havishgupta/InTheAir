@@ -271,35 +271,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAddGlobalNoteDialog(p: GeoPoint) {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_route_plan, null)
-        val etText = view.findViewById<AutoCompleteTextView>(R.id.etFrom)
-        val etTag = view.findViewById<AutoCompleteTextView>(R.id.etTo)
-        etText.hint = "Note text (e.g. Speed breaker)"
-        etTag.hint = "Group/Tag (e.g. Hazard)"
-        
-        view.findViewById<Button>(R.id.btnDownload).visibility = View.GONE
-        view.findViewById<Button>(R.id.btnDownloadManual).visibility = View.GONE
-        view.findViewById<Button>(R.id.btnDownloadIndia).visibility = View.GONE
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_note, null)
+        val etText = view.findViewById<AutoCompleteTextView>(R.id.etNoteText)
+        val etTag = view.findViewById<AutoCompleteTextView>(R.id.etNoteGroup)
+        val rgIcons = view.findViewById<android.widget.RadioGroup>(R.id.rgIcons)
 
         val tags = notesManager.getTags()
         etTag.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, tags))
 
         AlertDialog.Builder(this)
-            .setTitle("Add Global Note")
+            .setTitle("Add Note")
             .setView(view)
             .setPositiveButton("Save") { _, _ ->
                 val text = etText.text.toString().trim()
                 val tag = etTag.text.toString().trim().ifBlank { "General" }
+                val icon = when (rgIcons.checkedRadioButtonId) {
+                    R.id.rbIconSpeedbreaker -> "ic_speedbreaker"
+                    R.id.rbIconTent -> "ic_tent"
+                    R.id.rbIconDanger -> "ic_danger"
+                    R.id.rbIconFood -> "ic_food"
+                    else -> "ic_note_marker"
+                }
+
                 if (text.isNotBlank()) {
-                    notesManager.addNote(p.latitude, p.longitude, text, tag)
+                    notesManager.addNote(p.latitude, p.longitude, text, tag, icon)
                     drawNotes()
                     Toast.makeText(this, "Note saved to $tag", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Note text cannot be empty", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun updateRecordingUI() {
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
         val fab = findViewById<FloatingActionButton>(R.id.fabRecord)
