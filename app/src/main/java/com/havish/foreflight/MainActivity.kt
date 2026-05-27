@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
 
     private lateinit var voyageManager: VoyageManager
-    private lateinit var globalNotesManager: GlobalNotesManager
+    private lateinit var notesManager: NotesManager
     private val voyageLines = mutableListOf<org.osmdroid.views.overlay.Polyline>()
 
     private var recordingService: VoyageRecordingService? = null
@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity() {
                         val p = map.projection.fromPixels(event.x.toInt(), event.y.toInt()) as GeoPoint
                         val duration = prefs.getInt("long_press_duration", 500).toLong()
                         runnable = Runnable {
-                            showAddNoteDialog(p)
+                            showAddGlobalNoteDialog(p)
                         }
                         handler.postDelayed(runnable!!, duration)
                     }
@@ -246,23 +246,6 @@ class MainActivity : AppCompatActivity() {
         val fabRecord = findViewById<FloatingActionButton>(R.id.fabRecord)
         fabRecord.setOnClickListener {
             toggleVoyageRecording(fabRecord)
-        }
-        
-        findViewById<FloatingActionButton>(R.id.fabAddNote).setOnClickListener {
-            val input = android.widget.EditText(this)
-            AlertDialog.Builder(this)
-                .setTitle("Add Note")
-                .setView(input)
-                .setPositiveButton("Save") { _, _ ->
-                    val text = input.text.toString()
-                    if (text.isNotBlank() && lastLocation != null) {
-                        recordingService?.addNote(text, lastLocation!!.latitude, lastLocation!!.longitude)
-                        drawNoteMarker(lastLocation!!.latitude, lastLocation!!.longitude, text)
-                        Toast.makeText(this, "Note added", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
         }
 
         findViewById<FloatingActionButton>(R.id.fabLocation).setOnClickListener {
@@ -298,8 +281,8 @@ class MainActivity : AppCompatActivity() {
         view.findViewById<Button>(R.id.btnDownloadManual).visibility = View.GONE
         view.findViewById<Button>(R.id.btnDownloadIndia).visibility = View.GONE
 
-        val tags = globalNotesManager.getTags()
-        etTag.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, tags))
+        val tags = notesManager.getTags()
+        etTag.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, tags))
 
         AlertDialog.Builder(this)
             .setTitle("Add Global Note")
@@ -308,7 +291,7 @@ class MainActivity : AppCompatActivity() {
                 val text = etText.text.toString().trim()
                 val tag = etTag.text.toString().trim().ifBlank { "General" }
                 if (text.isNotBlank()) {
-                    globalNotesManager.addNote(p.latitude, p.longitude, text, tag)
+                    notesManager.addNote(p.latitude, p.longitude, text, tag)
                     drawNotes()
                     Toast.makeText(this, "Note saved to $tag", Toast.LENGTH_SHORT).show()
                 }
@@ -320,7 +303,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateRecordingUI() {
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
         val fab = findViewById<FloatingActionButton>(R.id.fabRecord)
-        val fabNote = findViewById<FloatingActionButton>(R.id.fabAddNote)
         val telemetryDashboard = findViewById<View>(R.id.telemetryDashboard)
         val tvModeIndicator = findViewById<View>(R.id.tvModeIndicator)
         
@@ -345,14 +327,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (isRecording) {
-            fabNote.visibility = View.VISIBLE
             if (recordingService?.isPaused() == true) {
                 fab.setImageResource(android.R.drawable.ic_media_play)
             } else {
                 fab.setImageResource(android.R.drawable.ic_media_pause)
             }
         } else {
-            fabNote.visibility = View.GONE
             fab.setImageResource(android.R.drawable.ic_media_play)
         }
     }
@@ -965,8 +945,5 @@ class MainActivity : AppCompatActivity() {
         map.onPause()
         locationOverlay.disableMyLocation()
         fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-}
-
     }
 }
