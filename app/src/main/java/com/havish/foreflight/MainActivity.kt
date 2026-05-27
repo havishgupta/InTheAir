@@ -274,29 +274,85 @@ class MainActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_note, null)
         val etText = view.findViewById<AutoCompleteTextView>(R.id.etNoteText)
         val etTag = view.findViewById<AutoCompleteTextView>(R.id.etNoteGroup)
+        val chipGroup = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.chipGroupTags)
         val rgIcons = view.findViewById<android.widget.RadioGroup>(R.id.rgIcons)
+        val ivNoteIcon = view.findViewById<ImageView>(R.id.ivNoteIcon)
 
         val tags = notesManager.getTags()
-        etTag.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, tags))
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, tags)
+        etTag.setAdapter(adapter)
+
+        val selectedTags = mutableSetOf<String>()
+
+        fun addChip(tagName: String) {
+            if (selectedTags.contains(tagName)) return
+            selectedTags.add(tagName)
+            
+            val chip = com.google.android.material.chip.Chip(this)
+            chip.text = tagName
+            chip.isCloseIconVisible = true
+            chip.setOnCloseIconClickListener {
+                chipGroup.removeView(chip)
+                selectedTags.remove(tagName)
+            }
+            chipGroup.addView(chip)
+        }
+
+        etTag.setOnItemClickListener { parent, _, position, _ ->
+            val selected = parent.getItemAtPosition(position) as String
+            addChip(selected)
+            etTag.setText("")
+        }
+
+        etTag.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                val input = etTag.text.toString().trim()
+                if (input.isNotEmpty()) {
+                    addChip(input)
+                    etTag.setText("")
+                }
+                true
+            } else false
+        }
 
         AlertDialog.Builder(this)
             .setTitle("Add Note")
             .setView(view)
             .setPositiveButton("Save") { _, _ ->
                 val text = etText.text.toString().trim()
-                val tag = etTag.text.toString().trim().ifBlank { "General" }
+                
+                // Add any leftover text in the tag field
+                val leftoverTag = etTag.text.toString().trim()
+                if (leftoverTag.isNotEmpty()) {
+                    selectedTags.add(leftoverTag)
+                }
+                
+                if (selectedTags.isEmpty()) {
+                    selectedTags.add("General")
+                }
+
                 val icon = when (rgIcons.checkedRadioButtonId) {
                     R.id.rbIconSpeedbreaker -> "ic_speedbreaker"
                     R.id.rbIconTent -> "ic_tent"
                     R.id.rbIconDanger -> "ic_danger"
                     R.id.rbIconFood -> "ic_food"
+                    R.id.rbIconGasStation -> "ic_gas_station"
+                    R.id.rbIconParking -> "ic_parking"
+                    R.id.rbIconWater -> "ic_water"
+                    R.id.rbIconHospital -> "ic_hospital"
+                    R.id.rbIconHotel -> "ic_hotel"
+                    R.id.rbIconStar -> "ic_star"
+                    R.id.rbIconFlag -> "ic_flag"
+                    R.id.rbIconCamera -> "ic_camera"
+                    R.id.rbIconViewpoint -> "ic_viewpoint"
+                    R.id.rbIconInfo -> "ic_info"
                     else -> "ic_note_marker"
                 }
 
                 if (text.isNotBlank()) {
-                    notesManager.addNote(p.latitude, p.longitude, text, tag, icon)
+                    notesManager.addNote(p.latitude, p.longitude, text, selectedTags.toList(), icon)
                     drawNotes()
-                    Toast.makeText(this, "Note saved to $tag", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Note saved to ${selectedTags.first()}", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this, "Note text cannot be empty", Toast.LENGTH_SHORT).show()
                 }
@@ -372,23 +428,30 @@ class MainActivity : AppCompatActivity() {
         val toRemove = map.overlays.filter { it is org.osmdroid.views.overlay.Marker && it.id == "global_note" }
         map.overlays.removeAll(toRemove)
 
+        // Only show note icons when zoomed in (level 10.0 or higher)
+        if (map.zoomLevelDouble < 10.0) {
+            map.invalidate()
+            return
+        }
+
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
         val allNotes = notesManager.getNotes()
 
         for (note in allNotes) {
-            val isVisible = prefs.getBoolean("tag_vis_${note.tag}", true)
+            // Check note-specific visibility first (from NotesActivity individual visibility toggle)
+            val isNoteSpecificallyHidden = !prefs.getBoolean("note_vis_${note.id}", true)
+            if (isNoteSpecificallyHidden) continue
+
+            // A note is visible if ANY of its tags are visible
+            val isVisible = note.tags.any { prefs.getBoolean("tag_vis_${it}", true) }
             if (isVisible) {
                 val marker = org.osmdroid.views.overlay.Marker(map)
                 marker.id = "global_note"
                 marker.position = GeoPoint(note.lat, note.lon)
-                marker.title = "[${note.tag}] ${note.text}"
+                marker.title = "[${note.tags.first()}] ${note.text}"
                 
-                val iconResId = resources.getIdentifier(note.icon, "drawable", packageName)
-                if (iconResId != 0) {
-                    marker.icon = ContextCompat.getDrawable(this, iconResId)
-                } else {
-                    marker.icon = ContextCompat.getDrawable(this, R.drawable.ic_note_marker)
-                }
+                val iconResId = AppIcons.getIconRes(note.icon)
+                marker.icon = ContextCompat.getDrawable(this, iconResId)
                 
                 map.overlays.add(marker)
             }

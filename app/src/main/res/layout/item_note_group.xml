@@ -11,43 +11,69 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
+        <!-- Header part (always visible) -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/llTagHeader"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground">
 
-            <TextView
-                android:id="@+id/tvTagName"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTagName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tag Name"
+                    android:textColor="@color/deep_sky_blue"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"/>
+
+                <TextView
+                    android:id="@+id/tvTagCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 notes"
+                    android:textColor="@color/text_medium_grey"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/switchVisibility"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tag Name"
-                android:textColor="@color/deep_sky_blue"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium"/>
+                android:text="Visible"
+                android:textColor="@color/text_dark_grey"
+                android:textSize="14sp"/>
 
-            <TextView
-                android:id="@+id/tvTagCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 notes"
-                android:textColor="@color/text_medium_grey"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"/>
         </LinearLayout>
 
-        <Switch
-            android:id="@+id/switchVisibility"
-            android:layout_width="wrap_content"
+        <!-- Expanded notes list -->
+        <LinearLayout
+            android:id="@+id/llNotesContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Visible"
-            android:textColor="@color/text_dark_grey"
-            android:textSize="14sp"/>
-
+            android:orientation="vertical"
+            android:visibility="gone">
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_grey" />
+                
+            <!-- Individual notes will be added here dynamically -->
+        </LinearLayout>
+        
     </LinearLayout>
 </androidx.cardview.widget.CardView>

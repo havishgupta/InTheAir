@@ -186,8 +186,6 @@ class SettingsActivity : AppCompatActivity() {
         val maxAltMeters = if (mode == "car") 609.0 else 12000.0
         val maxSpeedMs = if (mode == "car") 55.5 else 300.0
 
-        val midAltMeters = maxAltMeters / 2.0
-
         fun convertAlt(meters: Double): String {
             return when (altUnit) {
                 "m" -> String.format("%.0fm", meters)
@@ -197,8 +195,10 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<android.widget.TextView>(R.id.tvKeyAltLow).text = "0$altUnit"
-        findViewById<android.widget.TextView>(R.id.tvKeyAltMid).text = convertAlt(midAltMeters)
+        // 4-stop altitude key: Ground (0%), Low (33%), Mid (66%), High (100%)
+        findViewById<android.widget.TextView>(R.id.tvKeyAltGround).text = "0$altUnit"
+        findViewById<android.widget.TextView>(R.id.tvKeyAltLow).text = convertAlt(maxAltMeters * 0.33)
+        findViewById<android.widget.TextView>(R.id.tvKeyAltMid).text = convertAlt(maxAltMeters * 0.66)
         findViewById<android.widget.TextView>(R.id.tvKeyAltHigh).text = convertAlt(maxAltMeters) + "+"
 
         fun convertSpeed(ms: Double): String {
@@ -213,4 +213,5 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<android.widget.TextView>(R.id.tvKeySpeedSlow).text = "  0$speedUnit  "
         findViewById<android.widget.TextView>(R.id.tvKeySpeedFast).text = "  ${convertSpeed(maxSpeedMs)}+"
     }
+
 }

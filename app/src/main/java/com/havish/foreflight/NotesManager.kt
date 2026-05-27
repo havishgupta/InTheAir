@@ -11,7 +11,8 @@ data class Note(
     val lat: Double,
     val lon: Double,
     val text: String,
-    val tag: String,
+    val tag: String,           // Primary tag (kept for backward compatibility)
+    val tags: List<String>,    // All tags this note belongs to
     val icon: String
 )
 
@@ -28,13 +29,24 @@ class NotesManager(private val context: Context) {
             val list = mutableListOf<Note>()
             for (i in 0 until notesArr.length()) {
                 val obj = notesArr.getJSONObject(i)
+                val primaryTag = obj.getString("tag")
+
+                // Migration: read tags array if present, otherwise wrap single tag
+                val tagsArr = obj.optJSONArray("tags")
+                val tagsList = if (tagsArr != null) {
+                    (0 until tagsArr.length()).map { tagsArr.getString(it) }
+                } else {
+                    listOf(primaryTag)
+                }
+
                 list.add(
                     Note(
                         id = obj.getString("id"),
                         lat = obj.getDouble("lat"),
                         lon = obj.getDouble("lon"),
                         text = obj.getString("text"),
-                        tag = obj.getString("tag"),
+                        tag = primaryTag,
+                        tags = tagsList,
                         icon = obj.optString("icon", "ic_note_marker")
                     )
                 )
@@ -47,13 +59,19 @@ class NotesManager(private val context: Context) {
     }
 
     fun addNote(lat: Double, lon: Double, text: String, tag: String, icon: String = "ic_note_marker"): Note {
+        return addNote(lat, lon, text, listOf(tag), icon)
+    }
+
+    fun addNote(lat: Double, lon: Double, text: String, tags: List<String>, icon: String = "ic_note_marker"): Note {
         val notes = getNotes().toMutableList()
+        val primaryTag = tags.firstOrNull() ?: "General"
         val newNote = Note(
             id = UUID.randomUUID().toString(),
             lat = lat,
             lon = lon,
             text = text,
-            tag = tag,
+            tag = primaryTag,
+            tags = tags,
             icon = icon
         )
         notes.add(newNote)
@@ -63,6 +81,24 @@ class NotesManager(private val context: Context) {
 
     fun deleteNote(id: String) {
         val notes = getNotes().filter { it.id != id }
+        saveNotes(notes)
+    }
+
+    fun updateNote(id: String, newText: String? = null, newTags: List<String>? = null, newIcon: String? = null) {
+        val notes = getNotes().map { note ->
+            if (note.id == id) {
+                val updatedTags = newTags ?: note.tags
+                Note(
+                    id = note.id,
+                    lat = note.lat,
+                    lon = note.lon,
+                    text = newText ?: note.text,
+                    tag = updatedTags.firstOrNull() ?: note.tag,
+                    tags = updatedTags,
+                    icon = newIcon ?: note.icon
+                )
+            } else note
+        }
         saveNotes(notes)
     }
 
@@ -77,6 +113,10 @@ class NotesManager(private val context: Context) {
             obj.put("text", n.text)
             obj.put("tag", n.tag)
             obj.put("icon", n.icon)
+            // Save all tags
+            val tagsArr = JSONArray()
+            for (t in n.tags) tagsArr.put(t)
+            obj.put("tags", tagsArr)
             notesArr.put(obj)
         }
         root.put("notes", notesArr)
@@ -84,6 +124,10 @@ class NotesManager(private val context: Context) {
     }
 
     fun getTags(): List<String> {
-        return getNotes().map { it.tag }.distinct().sorted()
+        return getNotes().flatMap { it.tags }.distinct().sorted()
+    }
+
+    fun getNotesForTag(tag: String): List<Note> {
+        return getNotes().filter { tag in it.tags }
     }
 }

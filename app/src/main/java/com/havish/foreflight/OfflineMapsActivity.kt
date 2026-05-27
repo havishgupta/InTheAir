@@ -1,17 +1,23 @@
 package com.havish.foreflight
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,7 +48,8 @@ class OfflineMapsActivity : AppCompatActivity() {
         mapsListContainer = findViewById(R.id.mapsListContainer)
         tvEmpty = findViewById(R.id.tvEmpty)
 
-        findViewById<Button>(R.id.btnLoadMapFile).setOnClickListener {
+        // Add Map button in header
+        findViewById<ImageView>(R.id.btnLoadMapFile).setOnClickListener {
             mapFilePicker.launch(arrayOf("*/*"))
         }
 
@@ -53,7 +60,45 @@ class OfflineMapsActivity : AppCompatActivity() {
             prefs.edit().putBoolean("offline_maps_only", isChecked).apply()
         }
 
+        // Collapsible FAQ section
+        setupFaqSection()
+
         loadOfflineMaps()
+    }
+
+    private fun setupFaqSection() {
+        val tvFaqToggle = findViewById<TextView>(R.id.tvFaqToggle)
+        val cvInstructions = findViewById<CardView>(R.id.cvInstructions)
+        var isExpanded = false
+
+        tvFaqToggle.setOnClickListener {
+            isExpanded = !isExpanded
+            if (isExpanded) {
+                cvInstructions.visibility = View.VISIBLE
+                tvFaqToggle.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, android.R.drawable.arrow_up_float, 0)
+            } else {
+                cvInstructions.visibility = View.GONE
+                tvFaqToggle.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, android.R.drawable.arrow_down_float, 0)
+            }
+        }
+
+        // Make "OpenAndroMaps" a hyperlink in the instruction text
+        val tvSteps = findViewById<TextView>(R.id.tvInstructionSteps)
+        val fullText = tvSteps.text.toString()
+        val linkText = "OpenAndroMaps"
+        val startIndex = fullText.indexOf(linkText)
+
+        if (startIndex >= 0) {
+            val spannable = SpannableString(fullText)
+            spannable.setSpan(object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.openandromaps.org/en/downloads/countrys-and-regions"))
+                    startActivity(intent)
+                }
+            }, startIndex, startIndex + linkText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            tvSteps.text = spannable
+            tvSteps.movementMethod = LinkMovementMethod.getInstance()
+        }
     }
 
     private fun getFileName(uri: android.net.Uri): String {
@@ -139,7 +184,7 @@ class OfflineMapsActivity : AppCompatActivity() {
             
             val tvMapName = itemView.findViewById<TextView>(R.id.tvMapName)
             val tvMapSize = itemView.findViewById<TextView>(R.id.tvMapSize)
-            val btnActive = itemView.findViewById<Button>(R.id.btnActive)
+            val btnActive = itemView.findViewById<android.widget.Button>(R.id.btnActive)
             val btnDelete = itemView.findViewById<ImageView>(R.id.btnDelete)
 
             tvMapName.text = file.name

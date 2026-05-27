@@ -50,41 +50,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Instructions Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cvInstructions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/card_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="What are Notes?"
-                        android:textColor="@color/deep_sky_blue"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="12dp"/>
-                        
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Notes are permanent markers you can place on your map that persist across all your flights.\n\n• Long press anywhere on the map to add a note.\n• You can categorize notes using Tags.\n• Use this tab to toggle visibility of different tags on or off globally."
-                        android:textColor="@color/text_medium_grey"
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
             <!-- Tags Title -->
             <TextView
                 android:layout_width="wrap_content"
@@ -113,6 +78,56 @@
                 android:gravity="center"
                 android:layout_marginTop="24dp"
                 android:visibility="gone" />
+
+            <!-- FAQ Section (collapsible, at bottom) -->
+            <LinearLayout
+                android:id="@+id/llFaqSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="24dp">
+
+                <TextView
+                    android:id="@+id/tvFaqToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="What are Notes?"
+                    android:textColor="@color/deep_sky_blue"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="4dp"
+                    android:drawableEnd="@android:drawable/arrow_down_float"
+                    android:drawablePadding="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="8dp"/>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cvInstructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone"
+                    app:cardBackgroundColor="@color/card_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Notes are permanent markers you can place on your map that persist across all your flights.\n\n• Long press anywhere on the map to add a note.\n• You can categorize notes using Tags.\n• Use this tab to toggle visibility of different tags on or off globally."
+                            android:textColor="@color/text_medium_grey"
+                            android:textSize="14sp"
+                            android:lineSpacingExtra="4dp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

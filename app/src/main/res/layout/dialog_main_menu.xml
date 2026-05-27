@@ -16,14 +16,14 @@
         android:layout_marginBottom="20dp"
         android:background="@color/divider_grey" />
 
-    <!-- Voyages -->
+    <!-- Saved Voyages Menu Item -->
     <LinearLayout
         android:id="@+id/menuItemVoyages"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="24dp"
         android:background="@drawable/menu_item_bg"
         android:clickable="true"
         android:focusable="true">
@@ -31,34 +31,33 @@
         <ImageView
             android:layout_width="22dp"
             android:layout_height="22dp"
-            android:src="@android:drawable/ic_menu_recent_history"
+            android:src="@drawable/ic_voyage"
             android:tint="@color/deep_sky_blue"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Voyages icon"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Saved Voyages"
-            android:textSize="16sp"
+            android:text="Voyages"
             android:textColor="@color/text_dark_grey"
-            android:fontFamily="sans-serif-medium"/>
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
-    <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider_grey"
-        android:layout_marginHorizontal="16dp"/>
+        android:background="@color/divider_grey" />
 
-    <!-- Offline Maps -->
+    <!-- Offline Maps Menu Item -->
     <LinearLayout
         android:id="@+id/menuItemOfflineMaps"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="24dp"
         android:background="@drawable/menu_item_bg"
         android:clickable="true"
         android:focusable="true">
@@ -68,32 +67,31 @@
             android:layout_height="22dp"
             android:src="@drawable/ic_cloud"
             android:tint="@color/deep_sky_blue"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Offline Maps icon"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Offline Maps"
-            android:textSize="16sp"
             android:textColor="@color/text_dark_grey"
-            android:fontFamily="sans-serif-medium"/>
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
-    <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider_grey"
-        android:layout_marginHorizontal="16dp"/>
+        android:background="@color/divider_grey" />
 
-    <!-- Notes -->
+    <!-- Global Notes Menu Item -->
     <LinearLayout
         android:id="@+id/menuItemNotes"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="24dp"
         android:background="@drawable/menu_item_bg"
         android:clickable="true"
         android:focusable="true">
@@ -103,32 +101,31 @@
             android:layout_height="22dp"
             android:src="@drawable/ic_note_marker"
             android:tint="@color/deep_sky_blue"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Global Notes icon"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Global Notes"
-            android:textSize="16sp"
+            android:text="Notes"
             android:textColor="@color/text_dark_grey"
-            android:fontFamily="sans-serif-medium"/>
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
-    <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider_grey"
-        android:layout_marginHorizontal="16dp"/>
+        android:background="@color/divider_grey" />
 
-    <!-- Settings -->
+    <!-- Settings Menu Item -->
     <LinearLayout
         android:id="@+id/menuItemSettings"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="24dp"
         android:background="@drawable/menu_item_bg"
         android:clickable="true"
         android:focusable="true">
@@ -138,15 +135,16 @@
             android:layout_height="22dp"
             android:src="@drawable/ic_gear"
             android:tint="@color/text_medium_grey"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Settings icon"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Settings"
-            android:textSize="16sp"
             android:textColor="@color/text_medium_grey"
-            android:fontFamily="sans-serif-medium"/>
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
 </LinearLayout>

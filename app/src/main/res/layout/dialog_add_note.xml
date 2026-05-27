@@ -22,12 +22,27 @@
         android:inputType="text"
         android:layout_marginBottom="12dp"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Groups/Tags"
+        android:textSize="14sp"
+        android:textColor="#888888"
+        android:layout_marginBottom="4dp"/>
+
     <AutoCompleteTextView
         android:id="@+id/etNoteGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Group/Tag (e.g. Hazard)"
+        android:hint="Add a group (e.g. Hazard)"
         android:inputType="text"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- Chips container for selected groups -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupTags"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"/>
 
     <TextView
@@ -87,6 +102,86 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:button="@drawable/ic_food"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconGasStation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_gas_station"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconParking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_parking"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconWater"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_water"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconHospital"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_hospital"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconHotel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_hotel"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconStar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_star"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconFlag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_flag"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconCamera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_camera"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconViewpoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_viewpoint"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbIconInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_info"
                 android:padding="8dp"
                 android:layout_marginEnd="8dp"/>
         </RadioGroup>

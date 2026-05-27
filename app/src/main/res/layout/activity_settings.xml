@@ -468,9 +468,63 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_marginBottom="16dp">
-                        <TextView android:id="@+id/tvKeyAltLow" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="0" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="start"/>
-                        <TextView android:id="@+id/tvKeyAltMid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Mid" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="center"/>
-                        <TextView android:id="@+id/tvKeyAltHigh" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="High" android:textColor="@color/text_medium_grey" android:textSize="12sp" android:gravity="end"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:gravity="start|center_vertical">
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:background="@drawable/ic_color_dot_yellow"
+                                android:layout_marginEnd="4dp"/>
+                            <TextView android:id="@+id/tvKeyAltGround" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/text_medium_grey" android:textSize="11sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:gravity="center">
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:background="@drawable/ic_color_dot_green"
+                                android:layout_marginEnd="4dp"/>
+                            <TextView android:id="@+id/tvKeyAltLow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Low" android:textColor="@color/text_medium_grey" android:textSize="11sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:gravity="center">
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:background="@drawable/ic_color_dot_blue"
+                                android:layout_marginEnd="4dp"/>
+                            <TextView android:id="@+id/tvKeyAltMid" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mid" android:textColor="@color/text_medium_grey" android:textSize="11sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:gravity="end|center_vertical">
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:background="@drawable/ic_color_dot_purple"
+                                android:layout_marginEnd="4dp"/>
+                            <TextView android:id="@+id/tvKeyAltHigh" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="High" android:textColor="@color/text_medium_grey" android:textSize="11sp"/>
+                        </LinearLayout>
+
                     </LinearLayout>
 
                     <TextView
