@@ -66,14 +66,17 @@ class VoyagesActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val voyage = voyages[position]
             holder.tvVoyageName.text = voyage.name
-            holder.tvVoyageInfo.text = "${java.text.SimpleDateFormat("MMM dd, yyyy").format(java.util.Date(voyage.startTime))} -- ${voyage.points.size} points"
+            holder.tvVoyageInfo.text = java.text.SimpleDateFormat("MMM dd, yyyy").format(java.util.Date(voyage.startTime))
 
-            holder.ivView.setOnClickListener {
+            holder.itemView.setOnClickListener {
                 val intent = Intent(this@VoyagesActivity, MainActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 intent.putExtra("view_voyage_id", voyage.id)
                 startActivity(intent)
                 finish() // optionally close this activity when viewing on map
+            }
+            holder.ivView.setOnClickListener {
+                holder.itemView.performClick()
             }
             holder.ivRename.setOnClickListener {
                 showRenameVoyageDialog(voyage)

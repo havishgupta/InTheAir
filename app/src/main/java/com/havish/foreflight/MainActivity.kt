@@ -755,44 +755,50 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Recording resumed", Toast.LENGTH_SHORT).show()
             } else {
                 val voyage = recordingService?.getVoyageData()
-                val input = android.widget.EditText(this)
-                input.setText(voyage?.name ?: "")
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_stop_recording, null)
+                val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+                dialog.setContentView(dialogView)
+                dialog.setCancelable(false)
 
-                AlertDialog.Builder(this)
-                    .setTitle("Stop Recording")
-                    .setMessage("Enter a name for this voyage:")
-                    .setView(input)
-                    .setPositiveButton("Save") { _, _ ->
-                        val newName = input.text.toString()
-                        if (newName.isNotBlank()) voyage?.name = newName
-                        voyage?.let { voyageManager.saveVoyage(it) }
-                        recordingService?.stopRecording()
-                        clearVoyageDrawing()
-                        updateRecordingUI()
-                        Toast.makeText(this, "Saved Voyage: ${voyage?.name}", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNeutralButton("Discard") { _, _ ->
-                        AlertDialog.Builder(this)
-                            .setTitle("Confirm Discard")
-                            .setMessage("Are you sure you want to discard this voyage?")
-                            .setPositiveButton("Discard") { _, _ ->
-                                val id = voyage?.id
-                                recordingService?.stopRecording()
-                                if (id != null) voyageManager.deleteVoyage(id)
-                                clearVoyageDrawing()
-                                updateRecordingUI()
-                                Toast.makeText(this, "Voyage Discarded", Toast.LENGTH_SHORT).show()
-                            }
-                            .setNegativeButton("Cancel", null)
-                            .show()
-                    }
-                    .setNegativeButton("Pause") { _, _ ->
-                        recordingService?.pauseRecording()
-                        updateRecordingUI()
-                        Toast.makeText(this, "Recording paused", Toast.LENGTH_SHORT).show()
-                    }
-                    .setCancelable(false)
-                    .show()
+                val etVoyageName = dialogView.findViewById<android.widget.EditText>(R.id.etVoyageName)
+                etVoyageName.setText(voyage?.name ?: "")
+
+                dialogView.findViewById<android.widget.Button>(R.id.btnSave).setOnClickListener {
+                    val newName = etVoyageName.text.toString()
+                    if (newName.isNotBlank()) voyage?.name = newName
+                    voyage?.let { voyageManager.saveVoyage(it) }
+                    recordingService?.stopRecording()
+                    clearVoyageDrawing()
+                    updateRecordingUI()
+                    dialog.dismiss()
+                    Toast.makeText(this, "Saved Voyage: ${voyage?.name}", Toast.LENGTH_SHORT).show()
+                }
+
+                dialogView.findViewById<android.widget.Button>(R.id.btnDiscard).setOnClickListener {
+                    AlertDialog.Builder(this)
+                        .setTitle("Confirm Discard")
+                        .setMessage("Are you sure you want to discard this voyage?")
+                        .setPositiveButton("Discard") { _, _ ->
+                            val id = voyage?.id
+                            recordingService?.stopRecording()
+                            if (id != null) voyageManager.deleteVoyage(id)
+                            clearVoyageDrawing()
+                            updateRecordingUI()
+                            dialog.dismiss()
+                            Toast.makeText(this, "Voyage Discarded", Toast.LENGTH_SHORT).show()
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                }
+
+                dialogView.findViewById<android.widget.Button>(R.id.btnPause).setOnClickListener {
+                    recordingService?.pauseRecording()
+                    updateRecordingUI()
+                    dialog.dismiss()
+                    Toast.makeText(this, "Recording paused", Toast.LENGTH_SHORT).show()
+                }
+
+                dialog.show()
             }
         } else {
             val mode = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE).getString("voyage_mode", "plane") ?: "plane"
