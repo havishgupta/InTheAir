@@ -46,7 +46,7 @@
             android:name=".VoyagesActivity"
             android:exported="false" />
         <activity
-            android:name=".GlobalNotesActivity"
+            android:name=".NotesActivity"
             android:exported="false" />
         
         <service

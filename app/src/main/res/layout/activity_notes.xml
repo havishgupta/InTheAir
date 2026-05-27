@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/page_background"
-    tools:context=".GlobalNotesActivity">
+    tools:context=".NotesActivity">
 
     <!-- Header Section -->
     <LinearLayout
@@ -32,7 +32,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Global Notes"
+            android:text="Notes"
             android:textColor="@color/text_dark_grey"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -69,7 +69,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="What are Global Notes?"
+                        android:text="What are Notes?"
                         android:textColor="@color/deep_sky_blue"
                         android:textStyle="bold"
                         android:textSize="16sp"
@@ -78,7 +78,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Global Notes are permanent markers you can place on your map that persist across all your flights.\n\n• Long press anywhere on the map to add a note.\n• You can categorize notes using Tags.\n• Use this tab to toggle visibility of different tags on or off globally."
+                        android:text="Notes are permanent markers you can place on your map that persist across all your flights.\n\n• Long press anywhere on the map to add a note.\n• You can categorize notes using Tags.\n• Use this tab to toggle visibility of different tags on or off globally."
                         android:textColor="@color/text_medium_grey"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"/>
@@ -117,4 +117,4 @@
         </LinearLayout>
     </ScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>tLayout>

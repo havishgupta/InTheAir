@@ -12,17 +12,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class GlobalNotesActivity : AppCompatActivity() {
+class NotesActivity : AppCompatActivity() {
 
-    private lateinit var globalNotesManager: GlobalNotesManager
+    private lateinit var notesManager: NotesManager
     private lateinit var rvNoteGroups: RecyclerView
     private lateinit var tvEmpty: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_global_notes)
+        setContentView(R.layout.activity_notes)
 
-        globalNotesManager = GlobalNotesManager(this)
+        notesManager = NotesManager(this)
 
         findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             finish()
@@ -36,7 +36,7 @@ class GlobalNotesActivity : AppCompatActivity() {
     }
 
     private fun loadTags() {
-        val tags = globalNotesManager.getTags()
+        val tags = notesManager.getTags()
         if (tags.isEmpty()) {
             tvEmpty.visibility = View.VISIBLE
             rvNoteGroups.visibility = View.GONE
@@ -66,7 +66,7 @@ class GlobalNotesActivity : AppCompatActivity() {
             val tag = tags[position]
             holder.tvTagName.text = tag
             
-            val count = globalNotesManager.getNotes().count { it.tag == tag }
+            val count = notesManager.getNotes().count { it.tag == tag }
             holder.tvTagCount.text = "$count notes"
 
             holder.switchVisibility.setOnCheckedChangeListener(null)

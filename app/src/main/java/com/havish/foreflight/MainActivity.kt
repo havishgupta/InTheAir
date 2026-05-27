@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity() {
                         val p = map.projection.fromPixels(event.x.toInt(), event.y.toInt()) as GeoPoint
                         val duration = prefs.getInt("long_press_duration", 500).toLong()
                         runnable = Runnable {
-                            showAddGlobalNoteDialog(p)
+                            showAddNoteDialog(p)
                         }
                         handler.postDelayed(runnable!!, duration)
                     }
@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity() {
                 val tag = etTag.text.toString().trim().ifBlank { "General" }
                 if (text.isNotBlank()) {
                     globalNotesManager.addNote(p.latitude, p.longitude, text, tag)
-                    drawGlobalNotes()
+                    drawNotes()
                     Toast.makeText(this, "Note saved to $tag", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -383,7 +383,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    private fun drawGlobalNotes() {
+    private fun drawNotes() {
         // Remove existing global markers
         val toRemove = map.overlays.filter { it is org.osmdroid.views.overlay.Marker && it.id == "global_note" }
         map.overlays.removeAll(toRemove)
@@ -935,7 +935,7 @@ class MainActivity : AppCompatActivity() {
         checkForSavedMapFile()
         checkIntentForRoute(intent)
         updateRecordingUI()
-        drawGlobalNotes()
+        drawNotes()
     }
 
     override fun onNewIntent(intent: Intent?) {

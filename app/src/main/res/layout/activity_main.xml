@@ -214,19 +214,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Add Note FAB (only visible during recording) -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabAddNote"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:src="@drawable/ic_add_note"
-            android:visibility="gone"
-            app:backgroundTint="@color/accent_yellow"
-            app:elevation="2dp"
-            app:fabSize="mini"
-            app:tint="@color/white" />
-
         <!-- Record/Pause FAB -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabRecord"
