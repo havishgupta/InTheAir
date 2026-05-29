@@ -220,13 +220,4 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<android.widget.TextView>(R.id.tvKeySpeedSlow).text = "  0$speedUnit  "
         findViewById<android.widget.TextView>(R.id.tvKeySpeedFast).text = "  ${convertSpeed(maxSpeedMs)}+"
     }
-
-}", ms * 1.94384)
-            }
-        }
-
-        findViewById<android.widget.TextView>(R.id.tvKeySpeedSlow).text = "  0$speedUnit  "
-        findViewById<android.widget.TextView>(R.id.tvKeySpeedFast).text = "  ${convertSpeed(maxSpeedMs)}+"
-    }
-
 }

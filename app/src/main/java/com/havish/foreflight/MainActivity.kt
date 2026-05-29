@@ -967,23 +967,44 @@ class MainActivity : AppCompatActivity() {
         val altLevels = if (mode == "car") carAltLevelsM else planeAltLevelsFt
         val currentAlt = if (mode == "car") altM else altFt
 
-        var altLevelIdx = 0
-        for (i in altLevels.indices) {
-            if (currentAlt >= altLevels[i]) altLevelIdx = i
+        fun interpolateColor(color1: Int, color2: Int, fraction: Float): Int {
+            val f = fraction.coerceIn(0f, 1f)
+            val a = (android.graphics.Color.alpha(color1) * (1 - f) + android.graphics.Color.alpha(color2) * f).toInt()
+            val r = (android.graphics.Color.red(color1) * (1 - f) + android.graphics.Color.red(color2) * f).toInt()
+            val g = (android.graphics.Color.green(color1) * (1 - f) + android.graphics.Color.green(color2) * f).toInt()
+            val b = (android.graphics.Color.blue(color1) * (1 - f) + android.graphics.Color.blue(color2) * f).toInt()
+            return android.graphics.Color.argb(a, r, g, b)
         }
-        val altColor = colors[Math.min(altLevelIdx, colors.size - 1)]
 
-        val altRatio = (altLevelIdx.toFloat() / (colors.size - 1).toFloat()).coerceIn(0f, 1f)
-        val altThickness = 10f + (altRatio * 40f)
+        var lowerIdx = 0
+        while (lowerIdx < altLevels.size - 1 && currentAlt >= altLevels[lowerIdx + 1]) {
+            lowerIdx++
+        }
+        val upperIdx = Math.min(lowerIdx + 1, altLevels.size - 1)
+
+        val altFraction = if (lowerIdx == upperIdx) {
+            1.0f
+        } else {
+            val range = altLevels[upperIdx] - altLevels[lowerIdx]
+            if (range == 0.0) 0f else ((currentAlt - altLevels[lowerIdx]) / range).toFloat()
+        }
+
+        val altColor = interpolateColor(colors[lowerIdx], colors[upperIdx], altFraction)
+        
+        val overallAltRatio = if (altLevels.last() > 0) (currentAlt / altLevels.last()).coerceIn(0.0, 1.0).toFloat() else 0f
+        val altThickness = 10f + (overallAltRatio * 40f)
 
         val maxSpeed = if (mode == "car") 55.5 else 300.0
         var ratioSpeed = p2.speed / maxSpeed
         if (mode == "car" && ratioSpeed > 1.0) ratioSpeed = 1.0 + Math.log(ratioSpeed) * 0.2
         val clampedRatioSpeed = ratioSpeed.coerceIn(0.0, 1.0).toFloat()
 
-        val speedColorIdx = (clampedRatioSpeed * (colors.size - 1)).toInt().coerceIn(0, colors.size - 1)
-        val speedColor = colors[speedColorIdx]
+        val speedFractionTotal = clampedRatioSpeed * (colors.size - 1)
+        val speedLowerIdx = speedFractionTotal.toInt().coerceIn(0, colors.size - 1)
+        val speedUpperIdx = Math.min(speedLowerIdx + 1, colors.size - 1)
+        val speedFraction = speedFractionTotal - speedLowerIdx
 
+        val speedColor = interpolateColor(colors[speedLowerIdx], colors[speedUpperIdx], speedFraction)
         val speedThickness = 10f + (clampedRatioSpeed * 40f)
 
         if (colorIndicates == "speed") {
