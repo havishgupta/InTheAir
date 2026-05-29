@@ -398,9 +398,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val llAltitudeKey = findViewById<View>(R.id.llAltitudeKey)
-        if (isRecording && prefs.getBoolean("show_altitude_key", true)) {
+        val showScalesOnHome = prefs.getBoolean("show_scales_on_home", false)
+        if (showScalesOnHome || (isRecording && prefs.getBoolean("show_altitude_key", true))) {
             llAltitudeKey?.visibility = View.VISIBLE
-        } else if (!isRecording) {
+        } else {
             llAltitudeKey?.visibility = View.GONE
         }
     }
@@ -923,7 +924,8 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Viewing: ${voyage.name}", Toast.LENGTH_SHORT).show()
 
         val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
-        if (prefs.getBoolean("show_altitude_key", true)) {
+        val showScalesOnHome = prefs.getBoolean("show_scales_on_home", false)
+        if (showScalesOnHome || prefs.getBoolean("show_altitude_key", true)) {
             findViewById<View>(R.id.llAltitudeKey)?.visibility = View.VISIBLE
         }
     }
@@ -939,56 +941,59 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun drawVoyageSegment(p1: VoyagePoint, p2: VoyagePoint, mode: String) {
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val colorIndicates = prefs.getString("color_indicates", "altitude") ?: "altitude"
+
         val line = org.osmdroid.views.overlay.Polyline(map)
         line.addPoint(GeoPoint(p1.lat, p1.lon))
         line.addPoint(GeoPoint(p2.lat, p2.lon))
 
-        var maxAlt = 12000.0
-        var maxSpeed = 300.0
+        val altFt = p2.alt * 3.28084
+        val altM = p2.alt
 
-        if (mode == "car") {
-            maxAlt = 609.0
-            maxSpeed = 55.5
+        val planeAltLevelsFt = doubleArrayOf(0.0, 1000.0, 2000.0, 5000.0, 10000.0, 20000.0, 50000.0)
+        val carAltLevelsM = doubleArrayOf(0.0, 50.0, 100.0, 200.0, 500.0, 1000.0, 2000.0)
+        
+        val colors = intArrayOf(
+            android.graphics.Color.parseColor("#888888"), // 0: Gray
+            android.graphics.Color.parseColor("#00FFFF"), // 1: Cyan
+            android.graphics.Color.parseColor("#00FF00"), // 2: Green
+            android.graphics.Color.parseColor("#FFFF00"), // 3: Yellow
+            android.graphics.Color.parseColor("#FFA500"), // 4: Orange
+            android.graphics.Color.parseColor("#FF0000"), // 5: Red
+            android.graphics.Color.parseColor("#800080")  // 6: Purple
+        )
+
+        val altLevels = if (mode == "car") carAltLevelsM else planeAltLevelsFt
+        val currentAlt = if (mode == "car") altM else altFt
+
+        var altLevelIdx = 0
+        for (i in altLevels.indices) {
+            if (currentAlt >= altLevels[i]) altLevelIdx = i
         }
+        val altColor = colors[Math.min(altLevelIdx, colors.size - 1)]
 
-        var ratioAlt = p2.alt / maxAlt
-        if (mode == "car" && ratioAlt > 1.0) ratioAlt = 1.0 + Math.log(ratioAlt) * 0.1
-        ratioAlt = ratioAlt.coerceIn(0.0, 1.0)
+        val altRatio = (altLevelIdx.toFloat() / (colors.size - 1).toFloat()).coerceIn(0f, 1f)
+        val altThickness = 10f + (altRatio * 40f)
 
-        val color = when {
-            ratioAlt < 0.33 -> {
-                val fraction = ratioAlt * 3.0
-                android.graphics.Color.rgb(
-                    (255 - fraction * 255).toInt().coerceIn(0, 255),
-                    255,
-                    (224 - fraction * 224).toInt().coerceIn(0, 255)
-                )
-            }
-            ratioAlt < 0.66 -> {
-                val fraction = (ratioAlt - 0.33) * 3.0
-                android.graphics.Color.rgb(
-                    0,
-                    (255 - fraction * 255).toInt().coerceIn(0, 255),
-                    (fraction * 255).toInt().coerceIn(0, 255)
-                )
-            }
-            else -> {
-                val fraction = (ratioAlt - 0.66) * 3.0
-                android.graphics.Color.rgb(
-                    (fraction * 128).toInt().coerceIn(0, 255),
-                    0,
-                    (255 - fraction * 127).toInt().coerceIn(0, 255)
-                )
-            }
-        }
-        line.outlinePaint.color = color
-
+        val maxSpeed = if (mode == "car") 55.5 else 300.0
         var ratioSpeed = p2.speed / maxSpeed
         if (mode == "car" && ratioSpeed > 1.0) ratioSpeed = 1.0 + Math.log(ratioSpeed) * 0.2
-        ratioSpeed = ratioSpeed.coerceIn(0.0, 1.0)
-        val thickness = 5f + (ratioSpeed * 15f).toFloat()
+        val clampedRatioSpeed = ratioSpeed.coerceIn(0.0, 1.0).toFloat()
 
-        line.outlinePaint.strokeWidth = thickness
+        val speedColorIdx = (clampedRatioSpeed * (colors.size - 1)).toInt().coerceIn(0, colors.size - 1)
+        val speedColor = colors[speedColorIdx]
+
+        val speedThickness = 10f + (clampedRatioSpeed * 40f)
+
+        if (colorIndicates == "speed") {
+            line.outlinePaint.color = speedColor
+            line.outlinePaint.strokeWidth = altThickness
+        } else {
+            line.outlinePaint.color = altColor
+            line.outlinePaint.strokeWidth = speedThickness
+        }
+
         line.outlinePaint.isAntiAlias = true
 
         map.overlays.add(line)

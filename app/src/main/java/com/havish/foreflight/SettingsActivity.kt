@@ -109,6 +109,13 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putInt("logging_interval", interval).apply()
         }
 
+        // Customization: Show Scales
+        val switchShowScales = findViewById<android.widget.Switch>(R.id.switchShowScales)
+        switchShowScales.isChecked = prefs.getBoolean("show_scales_on_home", false)
+        switchShowScales.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("show_scales_on_home", isChecked).apply()
+        }
+
         // Customization: Mode Indicator
         val switchModeIndicator = findViewById<android.widget.Switch>(R.id.switchModeIndicator)
         switchModeIndicator.isChecked = prefs.getBoolean("show_mode_indicator", true)
@@ -207,6 +214,14 @@ class SettingsActivity : AppCompatActivity() {
                 "mph" -> String.format("%.0fmph", ms * 2.23694)
                 "mach" -> String.format("%.2fM", ms / 343.0)
                 else -> String.format("%.0fkts", ms * 1.94384)
+            }
+        }
+
+        findViewById<android.widget.TextView>(R.id.tvKeySpeedSlow).text = "  0$speedUnit  "
+        findViewById<android.widget.TextView>(R.id.tvKeySpeedFast).text = "  ${convertSpeed(maxSpeedMs)}+"
+    }
+
+}", ms * 1.94384)
             }
         }
 

@@ -89,9 +89,28 @@
                         android:id="@+id/rgVoyageMode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
                         <RadioButton android:id="@+id/rbModePlane" android:textColor="@color/text_dark_grey" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Plane" android:checked="true" android:fontFamily="sans-serif-medium"/>
                         <RadioButton android:id="@+id/rbModeCar" android:textColor="@color/text_dark_grey" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Car" android:fontFamily="sans-serif-medium"/>
+                    </RadioGroup>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Color Indicates"
+                        android:textColor="@color/text_dark_grey"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"/>
+                    
+                    <RadioGroup
+                        android:id="@+id/rgColorIndicates"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <RadioButton android:id="@+id/rbColorAlt" android:textColor="@color/text_dark_grey" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Altitude" android:checked="true" android:fontFamily="sans-serif-medium"/>
+                        <RadioButton android:id="@+id/rbColorSpeed" android:textColor="@color/text_dark_grey" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Speed" android:fontFamily="sans-serif-medium"/>
                     </RadioGroup>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -263,6 +282,24 @@
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-medium"
                         android:layout_marginBottom="16dp"/>
+
+                    <Switch
+                        android:id="@+id/switchShowScales"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Show Scales on Home"
+                        android:textColor="@color/text_dark_grey"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif-medium" />
+                        
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Shows altitude and speed scales on the home screen"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_medium_grey"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"/>
 
                     <Switch
                         android:id="@+id/switchModeIndicator"
