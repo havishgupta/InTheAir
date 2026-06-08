@@ -55,6 +55,8 @@ import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.mapsforge.MapsForgeTileSource
 import org.osmdroid.mapsforge.MapsForgeTileProvider
+import org.osmdroid.tileprovider.modules.OfflineTileProvider
+import org.osmdroid.tileprovider.tilesource.FileBasedTileSource
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.rendertheme.InternalRenderTheme
 import java.io.File
@@ -659,16 +661,41 @@ class MainActivity : AppCompatActivity() {
         val mapToLoad = if (activeMapName != null && File(mapsDir, activeMapName).exists()) {
             activeMapName
         } else {
-            mapsDir.listFiles()?.firstOrNull { it.extension == "map" }?.name
+            mapsDir.listFiles()?.firstOrNull { it.extension == "map" || it.extension == "mbtiles" }?.name
         }
 
         if (mapToLoad != null) {
             if (activeMapNameCache != mapToLoad) {
-                loadMapsforgeFile(File(mapsDir, mapToLoad))
+                if (mapToLoad.endsWith(".mbtiles", ignoreCase = true)) {
+                    loadMBTilesFile(File(mapsDir, mapToLoad))
+                } else {
+                    loadMapsforgeFile(File(mapsDir, mapToLoad))
+                }
                 activeMapNameCache = mapToLoad
             }
         } else {
             Toast.makeText(this, "Offline maps only enabled, but no map found.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun loadMBTilesFile(file: File) {
+        try {
+            val provider = OfflineTileProvider(org.osmdroid.tileprovider.util.SimpleRegisterReceiver(this), arrayOf(file))
+            map.setTileProvider(provider)
+            val archives = provider.archives
+            if (archives.isNotEmpty()) {
+                val sources = archives[0].tileSources
+                if (sources.isNotEmpty()) {
+                    map.setTileSource(FileBasedTileSource.getSource(sources.iterator().next()))
+                }
+            }
+            map.setUseDataConnection(false)
+
+            val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+            val initialZoom = prefs.getFloat("initial_zoom", 14.0f).toDouble()
+            map.controller.setZoom(initialZoom)
+        } catch (e: Throwable) {
+            Toast.makeText(this, "Failed to load offline mbtiles map", Toast.LENGTH_LONG).show()
         }
     }
 

@@ -168,7 +168,9 @@ class OfflineMapsActivity : AppCompatActivity() {
     private fun loadOfflineMaps() {
         mapsListContainer.removeAllViews()
         val mapsDir = File(filesDir, "mapsforge")
-        val mapFiles = mapsDir.listFiles()?.filter { it.extension == "map" } ?: emptyList()
+        val mapFiles = mapsDir.listFiles()?.filter { 
+            it.extension.equals("map", ignoreCase = true) || it.extension.equals("mbtiles", ignoreCase = true) 
+        }?.sortedBy { it.name } ?: emptyList()
 
         if (mapFiles.isEmpty()) {
             tvEmpty.visibility = View.VISIBLE
