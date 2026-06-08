@@ -160,7 +160,7 @@
                         android:id="@+id/tvInstructionSteps"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1. Open OpenAndroMaps or a similar vector map provider.\n2. Select your general region on the map.\n3. Browse through the map list and download the map for your region.\n4. Download the .map file only (ranges between 200MB to 2GB).\n5. You get a .zip file which you need to extract to get the .map file.\n6. Add that file here by clicking the + button in the header.\n7. You can enable the 'Offline Maps Only' option and add as many maps as you want."
+                        android:text="1. Open OpenAndroMaps (for vector maps) or source .mbtiles files (for satellite/topography).\n2. Vector maps (.map) are great for labels and zoom, while raster maps (.mbtiles) are best for satellite imagery.\n3. Browse through your preferred map provider and download the region you need.\n4. For OpenAndroMaps, download the .map file (usually requires extraction from .zip).\n5. Add that file (.map or .mbtiles) here by clicking the + button in the header.\n6. You can enable the 'Offline Maps Only' option and add as many maps as you want."
                         android:textColor="@color/text_medium_grey"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"/>

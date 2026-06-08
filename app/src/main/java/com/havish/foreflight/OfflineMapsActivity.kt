@@ -123,7 +123,7 @@ class OfflineMapsActivity : AppCompatActivity() {
                 result = result?.substring(cut + 1)
             }
         }
-        return result ?: "offline_map_${System.currentTimeMillis()}.map"
+        return result ?: "offline_map_${System.currentTimeMillis()}"
     }
 
     private fun importAndLoadMapFile(uri: android.net.Uri) {

@@ -24,7 +24,7 @@ class IntroActivity : AppCompatActivity() {
     private val descriptions = arrayOf(
         "Your personal map for flying! Track your real-time position right from your window seat.",
         "See your exact Speed, Altitude, Heading, and Climb Angle while in the air.",
-        "No internet at 30,000 feet? Download offline vector maps (.map files) from OpenAndroMaps and load them directly."
+        "No internet at 30,000 feet? Load offline vector maps (.map) or raster tiles (.mbtiles) for satellite and topography views."
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
