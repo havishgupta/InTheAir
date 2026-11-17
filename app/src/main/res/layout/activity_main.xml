@@ -187,6 +187,23 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- GPS Status Indicator -->
+    <TextView
+        android:id="@+id/tvGpsStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/mode_chip_bg"
+        android:text="GPS: waiting for fix..."
+        android:textColor="@color/white"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/telemetryDashboard"
+        app:layout_goneMarginTop="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Mode Indicator (bottom left) -->
     <TextView
         android:id="@+id/tvModeIndicator"

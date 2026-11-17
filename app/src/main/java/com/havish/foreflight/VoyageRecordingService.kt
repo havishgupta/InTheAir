@@ -9,9 +9,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -42,17 +46,37 @@ class VoyageRecordingService : Service() {
     private val binder = VoyageBinder()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var locationCallback: LocationCallback? = null
+    private var locationManager: LocationManager? = null
+    private var rawLocationListener: LocationListener? = null
     private var voyageManager: VoyageManager? = null
 
     private var currentVoyage: VoyageData? = null
     private var isRecording = false
     private var isPaused = false
     private var lastLogTime = 0L
+    private var lastFixTimestamp = 0L
+    private var lastLocationTime = 0L
     private var autoSaveJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
+    private val watchdogHandler = Handler(Looper.getMainLooper())
+
+    private val watchdogRunnable = object : Runnable {
+        override fun run() {
+            if (isRecording && !isPaused) {
+                val timeSinceLastFix = System.currentTimeMillis() - lastFixTimestamp
+                if (lastFixTimestamp > 0L && timeSinceLastFix > 10_000L) {
+                    Log.w(TAG, "Watchdog: No location fix for ${timeSinceLastFix / 1000}s. Restarting location listeners.")
+                    lastFixTimestamp = System.currentTimeMillis()
+                    restartLocationUpdates()
+                }
+            }
+            watchdogHandler.postDelayed(this, 5000L)
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createNotificationChannel()
     }
@@ -70,6 +94,7 @@ class VoyageRecordingService : Service() {
             Log.i(TAG, "Service destroyed while recording - auto-saving voyage")
             saveCurrentVoyage()
         }
+        stopWatchdog()
         stopLocationUpdates()
         autoSaveJob?.cancel()
     }
@@ -141,6 +166,7 @@ class VoyageRecordingService : Service() {
         }
 
         startLocationUpdates()
+        startWatchdog()
         startAutoSave()
         Log.i(TAG, "Started recording voyage: ${currentVoyage?.id}")
     }
@@ -151,6 +177,7 @@ class VoyageRecordingService : Service() {
         isPaused = false
         currentVoyage = null
         
+        stopWatchdog()
         stopLocationUpdates()
         autoSaveJob?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -163,6 +190,7 @@ class VoyageRecordingService : Service() {
     fun pauseRecording() {
         if (!isRecording) return
         isPaused = true
+        stopWatchdog()
         updateNotification("Voyage paused")
         Log.i(TAG, "Paused recording")
     }
@@ -171,6 +199,7 @@ class VoyageRecordingService : Service() {
         if (!isRecording) return
         isPaused = false
         lastLogTime = System.currentTimeMillis()
+        startWatchdog()
         updateNotification("Recording voyage...")
         Log.i(TAG, "Resumed recording")
     }
@@ -214,52 +243,132 @@ class VoyageRecordingService : Service() {
         }
     }
 
+    private fun startWatchdog() {
+        stopWatchdog()
+        if (lastFixTimestamp == 0L) {
+            lastFixTimestamp = System.currentTimeMillis()
+        }
+        watchdogHandler.postDelayed(watchdogRunnable, 5000L)
+    }
+
+    private fun stopWatchdog() {
+        watchdogHandler.removeCallbacks(watchdogRunnable)
+    }
+
+    private fun restartLocationUpdates() {
+        stopLocationUpdates()
+        startLocationUpdates()
+    }
+
+    private fun processVoyageLocation(location: Location) {
+        if (!isRecording || isPaused || currentVoyage == null) return
+
+        // Ignore duplicate or older fixes using location.time
+        if (lastLocationTime > 0L && location.time <= lastLocationTime) {
+            return
+        }
+        lastLocationTime = location.time
+        lastFixTimestamp = System.currentTimeMillis()
+
+        val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
+        val intervalSecs = prefs.getInt("logging_interval", 1)
+
+        val now = System.currentTimeMillis()
+        if (now - lastLogTime >= intervalSecs * 1000L) {
+            lastLogTime = now
+            val pt = VoyagePoint(
+                lat = location.latitude,
+                lon = location.longitude,
+                alt = if (location.hasAltitude()) location.altitude else 0.0,
+                speed = if (location.hasSpeed()) location.speed.toDouble() else 0.0,
+                timestamp = now
+            )
+            currentVoyage?.let { voyage ->
+                voyage.points.add(pt)
+                voyage.endTime = now
+
+                val count = voyage.points.size
+                if (count % 10 == 0) {
+                    updateNotification("Recording voyage... ($count points)")
+                }
+            }
+        }
+    }
+
     private fun startLocationUpdates() {
+        // 1. Primary: Raw LocationManager with GPS_PROVIDER (min time 1000ms, min dist 0)
         try {
-            val prefs = getSharedPreferences("foreflight_prefs", Context.MODE_PRIVATE)
-            val intervalSecs = prefs.getInt("logging_interval", 1)
+            if (locationManager == null) {
+                locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+            }
+            if (rawLocationListener == null) {
+                rawLocationListener = LocationListener { location ->
+                    processVoyageLocation(location)
+                }
+            }
+            locationManager?.let { lm ->
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    lm.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        1000L,
+                        0f,
+                        rawLocationListener!!,
+                        Looper.getMainLooper()
+                    )
+                    lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let { loc ->
+                        processVoyageLocation(loc)
+                    }
+                } else {
+                    Log.w(TAG, "GPS_PROVIDER is not enabled on device")
+                }
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Location permission not granted for raw GPS", e)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting raw GPS listener", e)
+        }
 
-            locationCallback = object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult) {
-                    if (!isRecording || isPaused || currentVoyage == null) return
-                    
-                    for (location in locationResult.locations) {
-                        val now = System.currentTimeMillis()
-                        if (now - lastLogTime >= intervalSecs * 1000L) {
-                            lastLogTime = now
-                            val pt = VoyagePoint(
-                                lat = location.latitude,
-                                lon = location.longitude,
-                                alt = if (location.hasAltitude()) location.altitude else 0.0,
-                                speed = if (location.hasSpeed()) location.speed.toDouble() else 0.0,
-                                timestamp = now
-                            )
-                            currentVoyage!!.points.add(pt)
-                            currentVoyage!!.endTime = now
-
-                            val count = currentVoyage!!.points.size
-                            if (count % 10 == 0) {
-                                updateNotification("Recording voyage... ($count points)")
-                            }
+        // 2. Fallback: FusedLocationProviderClient (1000ms min update interval)
+        try {
+            if (locationCallback == null) {
+                locationCallback = object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult) {
+                        for (location in locationResult.locations) {
+                            processVoyageLocation(location)
                         }
                     }
                 }
             }
 
             val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
-                .setMinUpdateIntervalMillis(500L)
+                .setMinUpdateIntervalMillis(1000L)
                 .build()
 
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, mainLooper)
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
         } catch (e: SecurityException) {
-            Log.e(TAG, "Location permission not granted", e)
+            Log.e(TAG, "Location permission not granted for fused provider", e)
+        } catch (e: Exception) {
+            Log.w(TAG, "Fused location provider unavailable in service, relying on raw GPS", e)
         }
     }
 
     private fun stopLocationUpdates() {
-        locationCallback?.let {
-            fusedLocationClient.removeLocationUpdates(it)
-            locationCallback = null
+        try {
+            locationCallback?.let {
+                fusedLocationClient.removeLocationUpdates(it)
+                locationCallback = null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing fused location updates", e)
+        }
+
+        try {
+            rawLocationListener?.let {
+                locationManager?.removeUpdates(it)
+                rawLocationListener = null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing raw GPS updates", e)
         }
     }
 }

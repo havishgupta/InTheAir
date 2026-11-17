@@ -11,9 +11,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.preference.PreferenceManager
 import android.provider.OpenableColumns
 import android.text.Editable
@@ -21,6 +25,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -75,6 +80,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvHeading: TextView
     private lateinit var tvClimb: TextView
     private lateinit var tvClimbAngle: TextView
+    private lateinit var tvGpsStatus: TextView
 
     private lateinit var cardDebugMode: CardView
     private lateinit var tvDebugLatLon: TextView
@@ -91,6 +97,35 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private var locationManager: LocationManager? = null
+    private var rawLocationListener: LocationListener? = null
+    private var lastFixTimestamp: Long = 0L
+    private var lastLocationTime: Long = 0L
+    private val watchdogHandler = Handler(Looper.getMainLooper())
+    private val statusHandler = Handler(Looper.getMainLooper())
+
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
+    private val watchdogRunnable = object : Runnable {
+        override fun run() {
+            val timeSinceLastFix = System.currentTimeMillis() - lastFixTimestamp
+            if (lastFixTimestamp > 0L && timeSinceLastFix > 10_000L) {
+                Log.w(TAG, "Watchdog: No location fix for ${timeSinceLastFix / 1000}s. Restarting location listeners.")
+                lastFixTimestamp = System.currentTimeMillis()
+                restartLocationUpdates()
+            }
+            watchdogHandler.postDelayed(this, 5000L)
+        }
+    }
+
+    private val statusRunnable = object : Runnable {
+        override fun run() {
+            updateGpsStatusUI()
+            statusHandler.postDelayed(this, 1000L)
+        }
+    }
 
     private lateinit var voyageManager: VoyageManager
     private lateinit var notesManager: NotesManager
@@ -115,6 +150,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         AndroidGraphicFactory.createInstance(application)
 
         val ctx = applicationContext
@@ -135,6 +171,9 @@ class MainActivity : AppCompatActivity() {
         tvHeading = findViewById(R.id.tvHeading)
         tvClimb = findViewById(R.id.tvClimb)
         tvClimbAngle = findViewById(R.id.tvClimbAngle)
+        tvGpsStatus = findViewById(R.id.tvGpsStatus)
+
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
 
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -171,6 +210,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopWatchdog()
+        stopStatusTimer()
+        stopLocationUpdates()
         AndroidGraphicFactory.clearResourceMemoryCache()
     }
 
@@ -734,25 +776,154 @@ class MainActivity : AppCompatActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationOverlay.enableMyLocation()
                 startLocationUpdates()
+                startWatchdog()
+                startStatusTimer()
             }
         }
+    }
+
+    private fun checkGpsEnabled() {
+        try {
+            val lm = locationManager ?: (getSystemService(Context.LOCATION_SERVICE) as? LocationManager)
+            if (lm != null && !lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                Toast.makeText(this, "GPS is disabled. Please enable GPS in device settings.", Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking GPS status", e)
+        }
+    }
+
+    private fun handleNewLocation(location: Location) {
+        if (lastLocationTime > 0L && location.time <= lastLocationTime) {
+            return
+        }
+        lastLocationTime = location.time
+        lastFixTimestamp = System.currentTimeMillis()
+        processLocation(location)
     }
 
     private fun setupLocationCallback() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
-                    processLocation(location)
+                    handleNewLocation(location)
                 }
             }
         }
     }
 
     private fun startLocationUpdates() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L).setMinUpdateIntervalMillis(500L).build()
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
-            fusedLocationClient.lastLocation.addOnSuccessListener { location -> if (location != null) processLocation(location) }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
+        checkGpsEnabled()
+
+        // 1. Primary: Raw LocationManager with GPS_PROVIDER (min time 1000ms, min distance 0)
+        try {
+            if (locationManager == null) {
+                locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+            }
+            if (rawLocationListener == null) {
+                rawLocationListener = LocationListener { location ->
+                    handleNewLocation(location)
+                }
+            }
+            locationManager?.let { lm ->
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    lm.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        1000L,
+                        0f,
+                        rawLocationListener!!,
+                        Looper.getMainLooper()
+                    )
+                    lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let { loc ->
+                        handleNewLocation(loc)
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException registering raw GPS listener", e)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error registering raw GPS listener", e)
+        }
+
+        // 2. Fallback: FusedLocationProviderClient (1000ms min update interval)
+        try {
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
+                .setMinUpdateIntervalMillis(1000L)
+                .build()
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) handleNewLocation(location)
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException registering fused location updates", e)
+        } catch (e: Exception) {
+            Log.w(TAG, "Fused location provider unavailable, relying on raw GPS", e)
+        }
+    }
+
+    private fun stopLocationUpdates() {
+        try {
+            if (::locationCallback.isInitialized) {
+                fusedLocationClient.removeLocationUpdates(locationCallback)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing fused location updates", e)
+        }
+
+        try {
+            rawLocationListener?.let {
+                locationManager?.removeUpdates(it)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing raw GPS updates", e)
+        }
+    }
+
+    private fun restartLocationUpdates() {
+        stopLocationUpdates()
+        startLocationUpdates()
+    }
+
+    private fun startWatchdog() {
+        stopWatchdog()
+        if (lastFixTimestamp == 0L) {
+            lastFixTimestamp = System.currentTimeMillis()
+        }
+        watchdogHandler.postDelayed(watchdogRunnable, 5000L)
+    }
+
+    private fun stopWatchdog() {
+        watchdogHandler.removeCallbacks(watchdogRunnable)
+    }
+
+    private fun startStatusTimer() {
+        stopStatusTimer()
+        statusHandler.post(statusRunnable)
+    }
+
+    private fun stopStatusTimer() {
+        statusHandler.removeCallbacks(statusRunnable)
+    }
+
+    private fun updateGpsStatusUI() {
+        if (!::tvGpsStatus.isInitialized) return
+        val lm = locationManager ?: (getSystemService(Context.LOCATION_SERVICE) as? LocationManager)
+        val isGpsEnabled = lm?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
+        if (!isGpsEnabled) {
+            tvGpsStatus.text = "GPS: Disabled"
+            return
+        }
+
+        if (lastFixTimestamp == 0L) {
+            tvGpsStatus.text = "GPS: waiting for fix..."
+        } else {
+            val diffSec = (System.currentTimeMillis() - lastFixTimestamp) / 1000L
+            tvGpsStatus.text = "GPS: last fix ${diffSec}s ago"
         }
     }
 
@@ -1054,6 +1225,8 @@ class MainActivity : AppCompatActivity() {
         map.onResume()
         locationOverlay.enableMyLocation()
         startLocationUpdates()
+        startWatchdog()
+        startStatusTimer()
         checkForSavedMapFile()
         checkIntentForRoute(intent)
         updateRecordingUI()
@@ -1079,6 +1252,8 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         map.onPause()
         locationOverlay.disableMyLocation()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        stopWatchdog()
+        stopStatusTimer()
+        stopLocationUpdates()
     }
 }
